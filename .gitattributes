@@ -1,0 +1,25 @@
+# Normalise line endings in the repository to LF regardless of contributor platform.
+# Without this, a Windows checkout commits CRLF and every file shows as modified for
+# everyone else — and `.vcf` output, which requires CRLF, becomes hard to reason about.
+* text=auto eol=lf
+
+# Binary assets: never transform.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.p12 binary
+*.cer binary
+
+# SVG is text, but keep it out of diffs — these are generated exports.
+*.svg -diff
+
+# The lockfile is generated; do not review it line by line.
+pnpm-lock.yaml -diff linguist-generated=true
+
+# Generated database types.
+shared/types/database.types.ts linguist-generated=true
