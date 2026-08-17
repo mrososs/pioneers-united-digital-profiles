@@ -1,0 +1,54 @@
+{
+  "name": "pioneers-united-digital-profiles",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Pioneers United Digital Profiles — executive digital identity platform (Nuxt + Supabase)",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "nuxt typecheck",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:status": "supabase status",
+    "db:reset": "supabase db reset",
+    "db:push": "supabase db push",
+    "db:diff": "supabase db diff",
+    "db:types": "supabase gen types typescript --local --schema public > shared/types/database.types.ts",
+    "db:types:linked": "supabase gen types typescript --linked --schema public > shared/types/database.types.ts"
+  },
+  "dependencies": {
+    "@nuxtjs/i18n": "^10.6.0",
+    "@nuxtjs/supabase": "^2.0.10",
+    "@supabase/supabase-js": "^2.112.3",
+    "nuxt": "^4.5.2",
+    "qrcode": "^1.5.4",
+    "vue": "^3.5.41",
+    "vue-router": "^4.6.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.17.0",
+    "@nuxt/test-utils": "^4.1.0",
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/qrcode": "^1.5.6",
+    "@vue/test-utils": "^2.4.11",
+    "eslint": "^10.8.1",
+    "happy-dom": "^20.11.2",
+    "supabase": "^2.114.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.10",
+    "vue-tsc": "^3.3.10"
+  }
+}

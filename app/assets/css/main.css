@@ -1,0 +1,236 @@
+@import 'tailwindcss';
+
+/* ===========================================================================
+   Pioneers United Digital Profiles — design tokens
+   ===========================================================================
+
+   HOW THIS FILE IS ORGANISED
+   --------------------------
+   1. `:root` declares raw token values as `--pu-*` custom properties.
+   2. `@theme inline` maps those raw values onto Tailwind's semantic token names,
+      which is what generates the utilities (`bg-surface`, `text-primary`, ...).
+      `inline` matters: it makes the generated utilities reference `--pu-*`
+      directly, so a scope that overrides `--pu-*` (dark mode, a per-organization
+      brand override injected at runtime) re-themes the whole UI with no rebuild.
+
+   RULES
+   -----
+   * Components use semantic utilities only: `bg-surface`, `text-muted-fg`,
+     `border-border`. Never a raw hex value, never `bg-[#192341]`.
+   * Spacing/radius come from the scale below, not from arbitrary values.
+   * RTL: use logical utilities (`ps-*`, `pe-*`, `ms-*`, `me-*`, `text-start`,
+     `text-end`, `border-s`, `border-e`). Never `pl-*`/`pr-*`/`text-left`.
+
+   PROVENANCE OF THE CURRENT VALUES
+   --------------------------------
+   The primary (#192341) and accent (#e18146) values are read out of the brand
+   logo supplied with this repository (app/assets/img/pure-development-logo.svg).
+   Everything else is a neutral, accessible placeholder scale. The final palette
+   arrives with the Pioneers United design system; when it does, only the `:root`
+   block below changes.
+   =========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* --- Brand ------------------------------------------------------------- */
+  --pu-primary: #192341;
+  --pu-primary-hover: #223056;
+  --pu-primary-foreground: #fcfdfd;
+  --pu-accent: #e18146;
+  --pu-accent-hover: #cf6f34;
+  --pu-accent-foreground: #1a1206;
+
+  /* --- Neutrals / surfaces ---------------------------------------------- */
+  --pu-background: #f7f8fa;
+  --pu-foreground: #131722;
+  --pu-surface: #ffffff;
+  --pu-surface-hover: #f2f4f7;
+  --pu-surface-inverse: #131722;
+  --pu-surface-inverse-foreground: #f7f8fa;
+
+  --pu-muted: #eef0f4;
+  --pu-muted-foreground: #5b6478;
+
+  --pu-border: #dfe3ea;
+  --pu-border-strong: #c4cad6;
+  --pu-input: #ffffff;
+  --pu-ring: #223056;
+
+  /* --- Status ------------------------------------------------------------ */
+  --pu-danger: #b42318;
+  --pu-danger-foreground: #fff5f4;
+  --pu-danger-surface: #fef3f2;
+  --pu-success: #067647;
+  --pu-success-foreground: #f0fdf6;
+  --pu-success-surface: #ecfdf3;
+  --pu-warning: #b54708;
+  --pu-warning-foreground: #fffaf0;
+  --pu-warning-surface: #fffaeb;
+  --pu-info: #175cd3;
+  --pu-info-foreground: #f5f9ff;
+  --pu-info-surface: #eff8ff;
+}
+
+/* Dark scheme. Kept token-for-token identical to light so every utility keeps
+   working; only the values change. */
+.dark {
+  color-scheme: dark;
+
+  --pu-primary: #5b7bbd;
+  --pu-primary-hover: #6e8bc9;
+  --pu-primary-foreground: #0b0f1a;
+  --pu-accent: #e9915b;
+  --pu-accent-hover: #f0a273;
+  --pu-accent-foreground: #1a1206;
+
+  --pu-background: #0b0f1a;
+  --pu-foreground: #eef0f4;
+  --pu-surface: #131a2b;
+  --pu-surface-hover: #1b2438;
+  --pu-surface-inverse: #eef0f4;
+  --pu-surface-inverse-foreground: #131722;
+
+  --pu-muted: #1b2438;
+  --pu-muted-foreground: #9aa4bb;
+
+  --pu-border: #24304a;
+  --pu-border-strong: #35446a;
+  --pu-input: #131a2b;
+  --pu-ring: #5b7bbd;
+
+  --pu-danger: #f97066;
+  --pu-danger-foreground: #1a0b0a;
+  --pu-danger-surface: #2a1412;
+  --pu-success: #47cd89;
+  --pu-success-foreground: #04140c;
+  --pu-success-surface: #0c2419;
+  --pu-warning: #fdb022;
+  --pu-warning-foreground: #1a1204;
+  --pu-warning-surface: #2a1e08;
+  --pu-info: #53b1fd;
+  --pu-info-foreground: #04101f;
+  --pu-info-surface: #0d1f33;
+}
+
+@theme inline {
+  /* --- Colour tokens ---------------------------------------------------- */
+  --color-background: var(--pu-background);
+  --color-foreground: var(--pu-foreground);
+  --color-surface: var(--pu-surface);
+  --color-surface-hover: var(--pu-surface-hover);
+  --color-surface-inverse: var(--pu-surface-inverse);
+  --color-surface-inverse-fg: var(--pu-surface-inverse-foreground);
+
+  --color-primary: var(--pu-primary);
+  --color-primary-hover: var(--pu-primary-hover);
+  --color-primary-fg: var(--pu-primary-foreground);
+  --color-accent: var(--pu-accent);
+  --color-accent-hover: var(--pu-accent-hover);
+  --color-accent-fg: var(--pu-accent-foreground);
+
+  --color-muted: var(--pu-muted);
+  --color-muted-fg: var(--pu-muted-foreground);
+
+  --color-border: var(--pu-border);
+  --color-border-strong: var(--pu-border-strong);
+  --color-input: var(--pu-input);
+  --color-ring: var(--pu-ring);
+
+  --color-danger: var(--pu-danger);
+  --color-danger-fg: var(--pu-danger-foreground);
+  --color-danger-surface: var(--pu-danger-surface);
+  --color-success: var(--pu-success);
+  --color-success-fg: var(--pu-success-foreground);
+  --color-success-surface: var(--pu-success-surface);
+  --color-warning: var(--pu-warning);
+  --color-warning-fg: var(--pu-warning-foreground);
+  --color-warning-surface: var(--pu-warning-surface);
+  --color-info: var(--pu-info);
+  --color-info-fg: var(--pu-info-foreground);
+  --color-info-surface: var(--pu-info-surface);
+
+  /* --- Radii ------------------------------------------------------------ */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1.25rem;
+  --radius-2xl: 1.75rem;
+
+  /* --- Typography -------------------------------------------------------
+     System stacks so the app has zero external font requests until the design
+     system specifies the real faces. `--font-arabic` is applied by the `dir`
+     attribute selector below, so Arabic never renders in a Latin fallback. */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-arabic: 'Segoe UI', Tahoma, 'Noto Naskh Arabic', 'Geeza Pro', 'Arabic Typesetting', sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* --- Elevation -------------------------------------------------------- */
+  --shadow-card: 0 1px 2px 0 rgb(19 23 34 / 0.06), 0 1px 3px 0 rgb(19 23 34 / 0.1);
+  --shadow-raised: 0 4px 6px -2px rgb(19 23 34 / 0.05), 0 12px 16px -4px rgb(19 23 34 / 0.1);
+  --shadow-overlay: 0 8px 8px -4px rgb(19 23 34 / 0.04), 0 20px 24px -4px rgb(19 23 34 / 0.1);
+
+  /* --- Motion ----------------------------------------------------------- */
+  --ease-emphasised: cubic-bezier(0.2, 0, 0, 1);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Arabic gets its own stack, driven purely by the document direction that
+     useLocaleHead() sets. No component needs to know about fonts. */
+  [dir='rtl'] body,
+  [lang^='ar'] body {
+    font-family: var(--font-arabic);
+  }
+
+  /* A single, consistent focus ring for the whole application. Accessibility is
+     a requirement, not a polish step. */
+  :focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  /* Respect the user's reduced-motion preference everywhere. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  /* Skip link used by the public and admin layouts. */
+  .pu-skip-link {
+    position: absolute;
+    inset-inline-start: 0.5rem;
+    top: 0.5rem;
+    z-index: 100;
+    transform: translateY(-200%);
+    border-radius: var(--radius-md);
+    background-color: var(--color-primary);
+    color: var(--color-primary-fg);
+    padding: 0.5rem 0.875rem;
+    font-size: 0.875rem;
+    transition: transform 150ms var(--ease-emphasised);
+  }
+
+  .pu-skip-link:focus {
+    transform: translateY(0);
+  }
+}

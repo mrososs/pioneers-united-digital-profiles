@@ -1,0 +1,324 @@
+{
+  "app": {
+    "name": "الملفات الرقمية لبيونيرز يونايتد",
+    "shortName": "الملفات الرقمية",
+    "tagline": "هوية رقمية تنفيذية لبيونيرز يونايتد",
+    "organization": "بيونيرز يونايتد"
+  },
+  "common": {
+    "actions": {
+      "save": "حفظ",
+      "saveChanges": "حفظ التغييرات",
+      "cancel": "إلغاء",
+      "close": "إغلاق",
+      "create": "إنشاء",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "confirm": "تأكيد",
+      "back": "رجوع",
+      "retry": "إعادة المحاولة",
+      "copy": "نسخ",
+      "copied": "تم النسخ",
+      "copyLink": "نسخ الرابط",
+      "download": "تنزيل",
+      "search": "بحث",
+      "filter": "تصفية",
+      "clear": "مسح",
+      "signIn": "تسجيل الدخول",
+      "signOut": "تسجيل الخروج",
+      "upload": "رفع",
+      "remove": "إزالة",
+      "preview": "معاينة",
+      "viewAll": "عرض الكل"
+    },
+    "states": {
+      "loading": "جارٍ التحميل…",
+      "saving": "جارٍ الحفظ…",
+      "empty": "لا يوجد شيء بعد",
+      "error": "حدث خطأ ما",
+      "success": "تم",
+      "required": "مطلوب",
+      "optional": "اختياري"
+    },
+    "pagination": {
+      "previous": "السابق",
+      "next": "التالي",
+      "page": "صفحة {page} من {total}",
+      "showing": "عرض {from}–{to} من {total}"
+    },
+    "language": {
+      "switch": "تغيير اللغة",
+      "current": "اللغة الحالية: {name}",
+      "en": "الإنجليزية",
+      "ar": "العربية"
+    },
+    "notAvailable": "غير متوفر"
+  },
+  "home": {
+    "eyebrow": "الملفات الرقمية",
+    "title": "الملفات الرقمية لبيونيرز يونايتد",
+    "description": "هوية رقمية متميّزة لقيادات بيونيرز يونايتد — رابط واحد يحمل بطاقة التعريف ورمز الاستجابة السريعة وبطاقة المحفظة.",
+    "publicNote": "يمكن الوصول إلى الملفات الشخصية عبر رابط خاص، مثل {example}.",
+    "adminCta": "دخول المسؤولين",
+    "corporateCta": "زيارة pioneersunited.com"
+  },
+  "profile": {
+    "meta": {
+      "descriptionFallback": "{name} — {organization}"
+    },
+    "sections": {
+      "about": "نبذة",
+      "contact": "التواصل",
+      "links": "روابط",
+      "company": "الشركة",
+      "share": "مشاركة"
+    },
+    "actions": {
+      "saveContact": "حفظ جهة الاتصال",
+      "saveContactHint": "يتم تنزيل ملف vCard بصيغة ‎.vcf‎ لإضافته إلى دفتر العناوين",
+      "call": "اتصال",
+      "email": "بريد إلكتروني",
+      "whatsapp": "واتساب",
+      "linkedin": "لينكدإن",
+      "website": "الموقع الإلكتروني",
+      "directions": "الاتجاهات",
+      "addToAppleWallet": "أضِف إلى Apple Wallet",
+      "addToGoogleWallet": "أضِف إلى Google Wallet",
+      "showQr": "إظهار رمز الاستجابة السريعة",
+      "downloadQrPng": "تنزيل PNG",
+      "downloadQrSvg": "تنزيل SVG"
+    },
+    "qr": {
+      "title": "امسح الرمز لفتح الملف",
+      "hint": "وجّه كاميرا الهاتف نحو الرمز",
+      "alt": "رمز استجابة سريعة يفتح الملف الرقمي لـ {name}"
+    },
+    "wallet": {
+      "title": "الإضافة إلى المحفظة",
+      "unavailable": "بطاقات المحفظة غير مُفعّلة بعد"
+    },
+    "photoAlt": "صورة {name}",
+    "logoAlt": "شعار {organization}",
+    "notFound": {
+      "title": "الملف غير موجود",
+      "description": "هذا الملف غير موجود، أو لم يتم نشره بعد.",
+      "action": "الانتقال إلى الصفحة الرئيسية"
+    }
+  },
+  "admin": {
+    "title": "لوحة التحكم",
+    "nav": {
+      "dashboard": "الرئيسية",
+      "profiles": "الملفات",
+      "qr": "رموز الاستجابة السريعة",
+      "wallet": "بطاقات المحفظة",
+      "settings": "الإعدادات",
+      "settingsCompany": "الشركة",
+      "settingsBranding": "الهوية البصرية",
+      "settingsIntegrations": "التكاملات",
+      "openMenu": "فتح القائمة",
+      "closeMenu": "إغلاق القائمة"
+    },
+    "login": {
+      "title": "دخول المسؤولين",
+      "description": "سجّل الدخول بالحساب المخصّص لك.",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "submit": "تسجيل الدخول",
+      "failed": "بيانات الدخول غير صحيحة.",
+      "noAccess": "هذا الحساب غير مصرّح له بالدخول إلى لوحة التحكم.",
+      "signedOut": "تم تسجيل خروجك."
+    },
+    "dashboard": {
+      "welcome": "مرحبًا بك{name}",
+      "totalProfiles": "الملفات",
+      "publishedProfiles": "المنشورة",
+      "draftProfiles": "المسودات",
+      "walletPasses": "بطاقات المحفظة",
+      "recentlyUpdated": "المحدَّثة حديثًا",
+      "quickActions": "إجراءات سريعة",
+      "createProfile": "إنشاء ملف"
+    },
+    "profiles": {
+      "title": "الملفات",
+      "description": "إنشاء الملفات الرقمية وتعديلها ونشرها.",
+      "newTitle": "ملف جديد",
+      "editTitle": "تعديل الملف",
+      "searchPlaceholder": "ابحث بالاسم أو الرابط",
+      "empty": "لا توجد ملفات بعد",
+      "emptyDescription": "أنشئ أول ملف رقمي للبدء.",
+      "columns": {
+        "name": "الاسم",
+        "slug": "الرابط",
+        "type": "النوع",
+        "status": "الحالة",
+        "updated": "آخر تحديث",
+        "actions": "إجراءات"
+      },
+      "publish": "نشر",
+      "unpublish": "تحويل إلى مسودة",
+      "viewPublic": "عرض الملف العام",
+      "deleteConfirmTitle": "حذف هذا الملف؟",
+      "deleteConfirmBody": "سيتوقف الرابط العام عن العمل فورًا، ولا يمكن التراجع عن ذلك.",
+      "created": "تم إنشاء الملف.",
+      "updated": "تم حفظ الملف.",
+      "published": "تم نشر الملف.",
+      "unpublished": "تم تحويل الملف إلى مسودة.",
+      "deleted": "تم حذف الملف."
+    },
+    "profileForm": {
+      "sections": {
+        "identity": "الهوية",
+        "role": "المنصب",
+        "contact": "التواصل",
+        "content": "المحتوى",
+        "links": "روابط إضافية",
+        "media": "الصورة",
+        "publishing": "النشر"
+      },
+      "fields": {
+        "slug": "الرابط العام",
+        "slugHint": "أحرف إنجليزية صغيرة وأرقام وشرطات فقط. يُستخدم في الرابط العام.",
+        "profileType": "نوع الملف",
+        "status": "الحالة",
+        "nameEn": "الاسم الكامل (بالإنجليزية)",
+        "nameAr": "الاسم الكامل (بالعربية)",
+        "jobTitleEn": "المسمى الوظيفي (بالإنجليزية)",
+        "jobTitleAr": "المسمى الوظيفي (بالعربية)",
+        "departmentEn": "الإدارة (بالإنجليزية)",
+        "departmentAr": "الإدارة (بالعربية)",
+        "bioEn": "نبذة (بالإنجليزية)",
+        "bioAr": "نبذة (بالعربية)",
+        "locationEn": "الموقع (بالإنجليزية)",
+        "locationAr": "الموقع (بالعربية)",
+        "email": "البريد الإلكتروني",
+        "phone": "رقم الهاتف",
+        "phoneHint": "بالصيغة الدولية، مثال ‎+966501234567‎",
+        "whatsapp": "رقم واتساب",
+        "linkedinUrl": "رابط لينكدإن",
+        "websiteUrl": "رابط الموقع الإلكتروني",
+        "photo": "الصورة",
+        "photoHint": "بصيغة JPEG أو PNG أو WebP أو AVIF، بحجم أقصى 5 ميغابايت.",
+        "linkType": "النوع",
+        "linkLabelEn": "التسمية (بالإنجليزية)",
+        "linkLabelAr": "التسمية (بالعربية)",
+        "linkUrl": "الرابط",
+        "linkEnabled": "ظاهر"
+      },
+      "addLink": "إضافة رابط",
+      "removeLink": "إزالة الرابط"
+    },
+    "profileType": {
+      "individual": "شخصي",
+      "company": "شركة"
+    },
+    "profileStatus": {
+      "draft": "مسودة",
+      "published": "منشور",
+      "inactive": "غير مُفعّل"
+    },
+    "qr": {
+      "title": "رموز الاستجابة السريعة",
+      "description": "كل رمز يحمل الرابط العام الرسمي للملف، لذا يبقى صالحًا ما دام الرابط ثابتًا.",
+      "selectProfile": "اختر ملفًا",
+      "empty": "انشر ملفًا لإنشاء رمز استجابة سريعة."
+    },
+    "wallet": {
+      "title": "بطاقات المحفظة",
+      "description": "بطاقات Apple Wallet و Google Wallet للملفات المنشورة.",
+      "provider": "المزوّد",
+      "status": "الحالة",
+      "lastGenerated": "آخر إنشاء",
+      "generate": "إنشاء",
+      "regenerate": "إعادة الإنشاء",
+      "notConfigured": "غير مُهيّأ",
+      "notConfiguredHint": "أضِف بيانات المزوّد إلى بيئة الخادم لتفعيل هذه الميزة.",
+      "missingConfig": "المفقود: {keys}",
+      "passStatus": {
+        "pending": "قيد الانتظار",
+        "active": "نشط",
+        "revoked": "ملغى",
+        "failed": "فاشل"
+      }
+    },
+    "settings": {
+      "title": "الإعدادات",
+      "description": "بيانات الشركة والهوية البصرية والتكاملات.",
+      "company": {
+        "title": "الشركة",
+        "description": "البيانات الظاهرة في ملف الشركة والمضمّنة في كل بطاقة vCard.",
+        "nameEn": "اسم الشركة (بالإنجليزية)",
+        "nameAr": "اسم الشركة (بالعربية)",
+        "slug": "رابط الشركة",
+        "taglineEn": "الشعار النصي (بالإنجليزية)",
+        "taglineAr": "الشعار النصي (بالعربية)",
+        "website": "الموقع الإلكتروني",
+        "email": "البريد الإلكتروني",
+        "phone": "رقم الهاتف",
+        "addressEn": "العنوان (بالإنجليزية)",
+        "addressAr": "العنوان (بالعربية)",
+        "logo": "الشعار",
+        "saved": "تم حفظ بيانات الشركة."
+      },
+      "branding": {
+        "title": "الهوية البصرية",
+        "description": "الألوان والأصول البصرية، وتُربط بمتغيّرات التصميم الدلالية في التطبيق.",
+        "primaryColor": "اللون الأساسي",
+        "primaryForegroundColor": "لون النص على الأساسي",
+        "accentColor": "اللون المميّز",
+        "logo": "الشعار",
+        "logoDark": "الشعار (للخلفيات الداكنة)",
+        "favicon": "أيقونة الموقع",
+        "ogImage": "صورة المشاركة",
+        "footerNoteEn": "ملاحظة التذييل (بالإنجليزية)",
+        "footerNoteAr": "ملاحظة التذييل (بالعربية)",
+        "saved": "تم حفظ الهوية البصرية."
+      },
+      "integrations": {
+        "title": "التكاملات",
+        "description": "تفعيل مزوّدي المحفظة أو تعطيلهم. تُحفظ بيانات الاعتماد في بيئة الخادم ولا تُخزَّن هنا.",
+        "enabled": "مُفعّل",
+        "credentials": "بيانات الاعتماد",
+        "credentialsConfigured": "مُهيّأة على الخادم",
+        "credentialsMissing": "غير مُهيّأة على الخادم",
+        "saved": "تم حفظ إعدادات التكامل."
+      }
+    }
+  },
+  "validation": {
+    "required": "هذا الحقل مطلوب.",
+    "tooLong": "هذه القيمة طويلة جدًا.",
+    "email": "أدخل بريدًا إلكترونيًا صحيحًا.",
+    "phone": "أدخل الرقم بالصيغة الدولية، مثال ‎+966501234567‎.",
+    "url": "أدخل رابطًا صحيحًا يبدأ بـ ‎http://‎ أو ‎https://‎.",
+    "slug": "استخدم أحرفًا إنجليزية صغيرة وأرقامًا وشرطات فقط.",
+    "slugReserved": "هذا الرابط محجوز. اختر رابطًا آخر.",
+    "slugTaken": "هذا الرابط مستخدم في ملف آخر.",
+    "uuid": "معرّف غير صحيح.",
+    "color": "أدخل لونًا بصيغة hex، مثال ‎#192341‎.",
+    "storagePath": "مسار ملف غير صحيح.",
+    "emptyUpdate": "لا يوجد ما يمكن حفظه.",
+    "passwordTooShort": "استخدم 12 حرفًا على الأقل.",
+    "passwordLowercase": "أضِف حرفًا إنجليزيًا صغيرًا.",
+    "passwordUppercase": "أضِف حرفًا إنجليزيًا كبيرًا.",
+    "passwordDigit": "أضِف رقمًا.",
+    "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+    "noSecretsInConfig": "لا يمكن تخزين البيانات السرية هنا. استخدم بيئة الخادم.",
+    "fileTooLarge": "حجم الملف كبير جدًا.",
+    "fileType": "نوع الملف غير مسموح."
+  },
+  "errors": {
+    "validation": "يُرجى تصحيح الحقول المُحدّدة.",
+    "unauthenticated": "يُرجى تسجيل الدخول للمتابعة.",
+    "forbidden": "لا تملك صلاحية تنفيذ هذا الإجراء.",
+    "notFound": "لم نتمكّن من العثور على ما تبحث عنه.",
+    "conflict": "يتعارض هذا مع عنصر موجود بالفعل.",
+    "rateLimited": "محاولات كثيرة جدًا. يُرجى الانتظار قليلًا.",
+    "notConfigured": "لم تُهيّأ هذه الميزة بعد.",
+    "upstream": "لم تستجب خدمة خارجية بشكل صحيح.",
+    "internal": "حدث خطأ لدينا. يُرجى المحاولة مرة أخرى.",
+    "offline": "يبدو أنك غير متصل بالإنترنت.",
+    "pageTitle": "خطأ {status}",
+    "goHome": "الانتقال إلى الصفحة الرئيسية"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  // Nuxt generates one project reference per environment (app, server, shared, node).
+  // Extra compiler options are declared in `nuxt.config.ts` under `typescript.tsConfig`
+  // so that every generated project inherits them.
+  "files": [],
+  "references": [
+    { "path": "./.nuxt/tsconfig.app.json" },
+    { "path": "./.nuxt/tsconfig.server.json" },
+    { "path": "./.nuxt/tsconfig.shared.json" },
+    { "path": "./.nuxt/tsconfig.node.json" }
+  ]
+}

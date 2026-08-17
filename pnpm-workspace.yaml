@@ -1,0 +1,11 @@
+# pnpm blocks dependency lifecycle scripts unless they are explicitly approved.
+# Only packages that genuinely need a build/postinstall step are listed, so a new
+# transitive dependency cannot silently run code at install time.
+#
+#   esbuild        downloads/links its platform binary
+#   unrs-resolver  native resolver used by the ESLint toolchain
+#   supabase       downloads the Supabase CLI binary (dev dependency)
+allowBuilds:
+  esbuild: true
+  unrs-resolver: true
+  supabase: true

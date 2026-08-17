@@ -1,0 +1,71 @@
+# ---------------------------------------------------------------------------
+# Dependencies
+# ---------------------------------------------------------------------------
+node_modules/
+.pnpm-store/
+
+# ---------------------------------------------------------------------------
+# Nuxt / Nitro build output
+# ---------------------------------------------------------------------------
+.nuxt/
+.output/
+.data/
+dist/
+.nitro/
+.cache/
+
+# ---------------------------------------------------------------------------
+# Secrets — NEVER commit these
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+
+# Supabase local state and generated credentials
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+
+# Wallet credentials: Apple Pass certificates and Google service accounts.
+# These are provisioned as environment variables / secret stores only.
+secrets/
+certificates/
+*.p12
+*.pem
+*.key
+*.cer
+*.certSigningRequest
+*.mobileprovision
+*-service-account.json
+google-service-account*.json
+apple-wallet*.p12
+wwdr*.cer
+
+# ---------------------------------------------------------------------------
+# Tooling caches
+# ---------------------------------------------------------------------------
+.eslintcache
+coverage/
+*.tsbuildinfo
+.vitest-cache/
+
+# ---------------------------------------------------------------------------
+# Editors / OS
+# ---------------------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# ---------------------------------------------------------------------------
+# Logs
+# ---------------------------------------------------------------------------
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*

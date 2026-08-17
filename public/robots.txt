@@ -1,0 +1,22 @@
+# Pioneers United Digital Profiles
+#
+# Published profiles are meant to be indexed — a shared profile link should surface in
+# search. Everything else must not be.
+#
+# The dashboard is additionally protected by an X-Robots-Tag: noindex header set in
+# nuxt.config.ts routeRules, because robots.txt is a request, not an enforcement.
+
+User-agent: *
+
+# Administrative dashboard, in both locales and unprefixed.
+Disallow: /admin
+Disallow: /en/admin
+Disallow: /ar/admin
+
+# API surface: vCard, QR and wallet endpoints are for humans following a link, not for
+# crawlers to enumerate.
+Disallow: /api/
+
+Allow: /
+
+Sitemap: https://profile.pioneersunited.com/sitemap.xml
