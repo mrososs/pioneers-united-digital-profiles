@@ -1,0 +1,106 @@
+# Applies supabase/migrations/** to a hosted Supabase project.
+#
+# Manual dispatch only, never on push. A schema change is not a deploy: it is
+# ordered before one, it is usually not reversible, and it must be a decision
+# rather than a side effect of merging. CLAUDE.md's rule that migrations are the
+# only way schema changes happen is what this workflow exists to enforce — it
+# gives operators a path that is not the Supabase dashboard.
+#
+# Required repository secrets:
+#   SUPABASE_ACCESS_TOKEN  personal access token, supabase.com/dashboard/account/tokens
+#   SUPABASE_PROJECT_REF   the project ref, e.g. abcdefghijklmnopqrst
+#   SUPABASE_DB_PASSWORD   the database password set when the project was created
+#
+# Point it at a staging project first. docs/deployment.md explains why staging
+# must be a separate project and not a schema inside production.
+name: Database migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "apply migrations" to confirm'
+        required: true
+        type: string
+      dry_run:
+        description: 'List pending migrations without applying them'
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: db-migrate
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  push:
+    name: Push migrations
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Gate this on a GitHub Environment with required reviewers so applying to
+    # production needs a second person. Without that configured it is only a
+    # label and the typed confirmation below is the sole guard.
+    environment: database
+
+    steps:
+      - name: Verify confirmation phrase
+        if: inputs.confirm != 'apply migrations'
+        run: |
+          echo "::error::Confirmation phrase did not match. Nothing was applied."
+          exit 1
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # The Supabase CLI is a devDependency, so the version that runs here is the
+      # version in the lockfile rather than whatever latest happens to be today.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Link project
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          pnpm exec supabase link \
+            --project-ref "${{ secrets.SUPABASE_PROJECT_REF }}" \
+            --password "${{ secrets.SUPABASE_DB_PASSWORD }}"
+
+      - name: List pending migrations
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: pnpm exec supabase migration list --linked
+
+      - name: Apply migrations
+        if: inputs.dry_run == false
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: pnpm exec supabase db push --linked --include-all
+
+      # Schema drift between the hosted database and shared/types/database.types.ts
+      # is silent — the app compiles against a shape the database no longer has.
+      # Surfacing it here turns that into a visible diff on the run.
+      - name: Check generated types are still current
+        if: inputs.dry_run == false
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          pnpm exec supabase gen types typescript --linked --schema public \
+            > /tmp/database.types.ts
+          if ! diff -u shared/types/database.types.ts /tmp/database.types.ts; then
+            echo "::warning::shared/types/database.types.ts is stale. Run 'pnpm db:types:linked' and commit the result."
+          fi

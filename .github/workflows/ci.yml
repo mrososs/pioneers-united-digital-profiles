@@ -1,0 +1,71 @@
+# Quality gates.
+#
+# Deployment is NOT done here. Vercel's Git integration builds and deploys every
+# push by itself, which means this workflow and the deploy race rather than
+# gate — a red run does not stop a preview from going out. It still earns its
+# place: it is the check a pull request blocks on, and it catches the two things
+# a Vercel build cannot, because Vercel only ever runs `nuxt build`:
+#
+#   * type errors  — `typescript.typeCheck` is false so `nuxt build` never type
+#                    checks; `pnpm typecheck` is the only thing that does
+#   * test failures — Vercel does not run Vitest
+#
+# To make this an actual gate, set the project's Ignored Build Step in Vercel to
+# require the commit status. See docs/deployment.md.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A force-push or a quick second commit should cancel the run it superseded.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # No version pinned here on purpose: the action reads `packageManager`
+      # from package.json, so CI and Vercel resolve the same pnpm.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # postinstall runs `nuxt prepare`, which generates .nuxt/tsconfig.json and
+      # the module type shims. typecheck cannot run before it.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test
+        run: pnpm test
+
+      # Deliberately no Supabase environment variables. The build must not need
+      # them — @nuxtjs/supabase warns and carries on — and proving that here is
+      # what keeps a missing production variable a runtime 500 rather than a
+      # failed deploy with no output.
+      - name: Build
+        run: pnpm build
