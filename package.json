@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.22.0",
   "description": "Pioneers United Digital Profiles — executive digital identity platform (Nuxt + Supabase)",
   "engines": {
     "node": ">=20.19.0"
