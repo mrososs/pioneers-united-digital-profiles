@@ -246,7 +246,10 @@ and `build` do not.
   data lives in `supabase/seed.sql` and is local-only.
 - **The canonical profile URL is infrastructure.** It is encoded in printed QR codes.
   Changing a slug breaks physical material — treat it as a migration, not an edit.
-- **Never bypass migrations.** No manual schema edits in the Supabase dashboard.
+- **Never bypass migrations.** No manual schema edits in the Supabase dashboard, and none
+  through the Supabase MCP server either. A migration file in `supabase/migrations/` is the
+  record; a schema change that exists only in the hosted database is invisible to `db:reset`,
+  to review and to the next environment. See "Supabase MCP" below.
 - **Avoid unnecessary dependencies.** Prefer the platform. Every addition is a security
   and maintenance liability.
 
@@ -316,6 +319,48 @@ pnpm db:types      # regenerate shared/types/database.types.ts, and commit it
 **Never report a task complete if verification failed.** Report what failed, with the
 actual output. A partially working change described accurately is far more useful than a
 broken change described as done.
+
+---
+
+## Supabase MCP
+
+`.mcp.json` declares the hosted Supabase MCP server at project scope, so it is shared with
+anyone who clones the repository. It is pinned to project ref `rolbihdglejddolhnzew`.
+
+The ref is committed deliberately: it is the public hostname
+(`https://rolbihdglejddolhnzew.supabase.co`), not a credential. No key is in `.mcp.json`.
+Access is granted per developer by an OAuth flow, which means the server can only ever do
+what the signed-in operator is already allowed to do.
+
+Approval and authentication happen once, from a real terminal — not an IDE extension:
+
+```bash
+claude          # approve the project-scoped server when prompted
+/mcp            # select supabase → Authenticate
+```
+
+**What it is for:** reading schema, inspecting logs and advisors, generating types,
+searching documentation. It shortens the loop that otherwise requires Docker.
+
+**What it must not be used for:** applying schema changes. The enabled feature set includes
+`database`, so the tooling *can* execute DDL against the hosted project. Doing so produces
+exactly the state "Never bypass migrations" exists to prevent — a live schema with no
+migration file behind it, which `pnpm db:reset` cannot reproduce and no reviewer ever saw.
+Author a migration and apply it through `pnpm db:push` or the **Database migrations**
+workflow.
+
+Because that rule depends on operator discipline rather than a mechanism, prefer adding
+`&read_only=true` to the URL. It makes the server execute every query as a read-only
+Postgres user, so the rule is enforced by the connection rather than by intention:
+
+```bash
+claude mcp remove supabase -s project
+claude mcp add --scope project --transport http supabase \
+  "https://mcp.supabase.com/mcp?project_ref=rolbihdglejddolhnzew&read_only=true&features=docs%2Caccount%2Cdatabase%2Cdebugging%2Cdevelopment%2Cfunctions%2Cbranching"
+```
+
+The trade-off is real: read-only also blocks the MCP from seeding demo rows or creating the
+first `admin_users` record, so those go through the dashboard or SQL editor instead.
 
 ---
 

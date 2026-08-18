@@ -17,6 +17,144 @@ than the one that was tested.
 
 ---
 
+## Continuous integration and deployment
+
+### Who does what
+
+```text
+push / PR ──┬─► GitHub Actions (.github/workflows/ci.yml)
+            │     lint · typecheck · test · build          ← the PR gate
+            │
+            └─► Vercel Git integration
+                  pnpm install --frozen-lockfile && nuxt build
+                  PR   → preview URL, commented on the pull request
+                  main → production
+```
+
+Vercel owns the deploy. Actions does **not** deploy, so there are no Vercel tokens in
+GitHub secrets and nothing to keep in sync.
+
+The two run in parallel, which means **a failing CI run does not by itself stop a
+preview from being published.** Actions still earns its place, because Vercel only ever
+runs `nuxt build` and that misses two whole classes of failure:
+
+| | Vercel build | `ci.yml` |
+|---|---|---|
+| Compile / bundle errors | yes | yes |
+| **Type errors** | **no** — `typescript.typeCheck` is `false`, so `nuxt build` never type checks | yes |
+| **Test failures** | **no** — Vercel does not run Vitest | yes |
+
+To make CI an actual deploy gate, set **Project Settings → Git → Ignored Build Step** to a
+command that exits `0` only when the CI status is green, or simply require the `verify`
+check in a branch protection rule so nothing reaches `main` un-gated. The second is
+usually enough: previews on a feature branch are allowed to be broken, production is not.
+
+### Environment variables
+
+Set these in **Project Settings → Environment Variables**, per environment. Vercel
+injects them at build *and* runtime, which is what `runtimeConfig` needs.
+
+| Variable | Production | Preview | Sensitive |
+|---|---|---|---|
+| `NUXT_PUBLIC_SITE_URL` | the production origin | the same production origin — see below | no |
+| `NUXT_PUBLIC_SUPABASE_URL` | `https://<ref>.supabase.co` | staging project | no |
+| `NUXT_PUBLIC_SUPABASE_KEY` | publishable / anon key | staging key | no |
+| `SUPABASE_SECRET_KEY` | secret / service_role key | staging key | **yes** |
+| `NUXT_PUBLIC_DEFAULT_ORGANIZATION_SLUG` | `pioneers-united` | `pioneers-united` | no |
+| `NUXT_LOG_LEVEL` | `info` | `debug` | no |
+
+`NUXT_WALLET_*` stay unset until credentials arrive; the wallet endpoints answer
+503 "not configured" rather than failing, so an unset value is the correct state.
+
+> **Preview deployments cannot have a self-referential `NUXT_PUBLIC_SITE_URL`.**
+> Every preview gets its own generated hostname, but `siteOrigin()` in
+> `server/utils/urls.ts` reads the configured origin and deliberately never the request
+> `Host` header — otherwise a forged header could rewrite the target of a QR code already
+> printed on a business card. So on a preview, the page renders at the preview host while
+> its QR code, vCard `URL` and `og:url` still point at the configured origin.
+>
+> This is working as intended, not a bug to route around. The consequence for
+> demonstrations: **send the client the production URL, never a preview URL** — on a
+> preview the page looks right but scanning the QR code takes you somewhere else.
+
+### Region
+
+`vercel.json` pins `fra1` (Frankfurt). It is the closest region to Saudi Arabia that
+Vercel offers on every plan, and a public profile opened from a QR scan on mobile data is
+the latency case that matters. Remove the key to fall back to the account default (`iad1`,
+Washington) if the plan rejects it.
+
+### Database migrations in CI
+
+`.github/workflows/db-migrate.yml` applies `supabase/migrations/**` to a hosted project.
+Manual dispatch only, defaulting to a dry run — a schema change is ordered *before* a
+deploy and is mostly irreversible, so it must be a decision rather than a merge side
+effect. It needs three repository secrets:
+
+| Secret | Where from |
+|---|---|
+| `SUPABASE_ACCESS_TOKEN` | supabase.com/dashboard/account/tokens |
+| `SUPABASE_PROJECT_REF` | Project Settings → General → Reference ID |
+| `SUPABASE_DB_PASSWORD` | set when the project was created |
+
+Gate it behind a GitHub Environment named `database` with required reviewers if a second
+pair of eyes should sign off before production.
+
+---
+
+## First deploy runbook
+
+In order. Steps 1–2 are the blocking ones — without a hosted database the site builds and
+serves, but every profile route 500s or renders empty.
+
+**1. Apply the schema to the hosted Supabase project**
+
+The project exists — ref `rolbihdglejddolhnzew`, so the origin is
+`https://rolbihdglejddolhnzew.supabase.co`. The ref is not a secret; it is the public
+hostname. The keys are, and they live only in Vercel and a local `.env`.
+
+The migrations have never run against it, so the schema is still empty. Either path works:
+
+```bash
+# From a terminal, once
+pnpm exec supabase login
+pnpm exec supabase link --project-ref rolbihdglejddolhnzew
+pnpm exec supabase migration list --linked   # confirm all 7 are pending
+pnpm db:push                                 # apply them
+pnpm db:types:linked                         # regenerate types, then commit the result
+```
+
+Or run the **Database migrations** workflow from the Actions tab once the three
+`SUPABASE_*` secrets are set, leaving `dry_run` checked for the first pass.
+
+**2. Create the first administrator and some content**
+
+`supabase/seed.sql` is local-only and never runs against a hosted project. So:
+Authentication → Users → create the Auth user, then insert the matching `admin_users`
+row. The Auth user by itself authorizes nothing — that row is what does. Then sign in at
+`/en/admin/login` and publish at least one profile, or the demo has nothing to show.
+
+Also disable **"Allow new users to sign up"** now. This product has no public
+registration, and a hosted project has it on by default.
+
+**3. Connect Vercel**
+
+Import the GitHub repository. Framework, install command and region come from
+`vercel.json`; set Node to 22.x to match CI. Add the environment variables above, then
+redeploy — variables added after a build are not retroactive.
+
+**4. Point Supabase back at the deployment**
+
+Authentication → URL Configuration: set Site URL and Redirect URLs to the deployment
+origin. Admin sign-in fails with a redirect error until this matches.
+
+**5. Verify**
+
+Work through the post-deploy `curl` checks below against the production URL, then scan a
+QR code with a real phone and import a vCard on both iOS and Android.
+
+---
+
 ## Environments
 
 | | Local | Staging (recommended) | Production |
