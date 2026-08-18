@@ -397,9 +397,14 @@ Accurate as of the bootstrap. Update this section as things change.
   refuses a production deployment (403) and no commit status is posted. Connecting it
   requires the dashboard import flow — the GitHub consent screen cannot be driven from an
   API or MCP. See `docs/deployment.md`, "First deploy runbook".
-- **Migrations have not been executed against any live database.** They were authored but
-  Docker was unavailable in the bootstrap environment. Run `pnpm db:reset` as the first
-  step of local setup. The hosted project (ref `rolbihdglejddolhnzew`) exists but its
-  schema is still empty, so every profile route there will fail until `pnpm db:push` runs.
+- **Migrations have not been run locally.** Docker was unavailable in the bootstrap
+  environment. Run `pnpm db:reset` as the first step of local setup. All 7 migrations
+  **have** been applied to the hosted project (ref `rolbihdglejddolhnzew`) via
+  `pnpm db:push`; `shared/types/database.types.ts` reflects its live schema. The schema
+  still has zero rows — no organization, admin, or profile exists there yet. See
+  "First deploy runbook" → step 2 in `docs/deployment.md` to create the first admin.
+- **The hosted Supabase MCP server is locked to `read_only=true`** in `.mcp.json`, per
+  "Supabase MCP" above. Anyone who already has it connected needs to reconnect
+  (`/mcp` → reauthenticate) to pick up the new URL.
 - **No sitemap.** `public/robots.txt` references one. Add `@nuxtjs/sitemap` when public
   profiles go live, or remove the reference.
