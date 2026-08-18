@@ -388,8 +388,18 @@ Accurate as of the bootstrap. Update this section as things change.
 - **Motion is GSAP + ScrollTrigger** (`app/plugins/motion.ts`), kept to entrance reveals
   only. The design system's rule is that nothing scales, bounces or slides decoratively;
   do not add parallax or pinning without agreeing to change that rule first.
-- **Migrations have not been executed against a live database yet.** They were authored
-  but Docker was unavailable in the bootstrap environment. Run `pnpm db:reset` as the
-  first step of local setup and fix anything it reports.
+- **CI is live; deployment is not yet.** `.github/workflows/ci.yml` runs lint, typecheck,
+  test and build on every push and pull request and is green. It does **not** deploy —
+  Vercel's Git integration is meant to, and because both run in parallel a red CI run does
+  not block a preview. Branch protection on the `verify` check is what makes it a gate.
+- **The Vercel project is not connected yet.** `vercel.json` is committed and correct, but
+  the Vercel account has no GitHub App access to this private repository, so the API
+  refuses a production deployment (403) and no commit status is posted. Connecting it
+  requires the dashboard import flow — the GitHub consent screen cannot be driven from an
+  API or MCP. See `docs/deployment.md`, "First deploy runbook".
+- **Migrations have not been executed against any live database.** They were authored but
+  Docker was unavailable in the bootstrap environment. Run `pnpm db:reset` as the first
+  step of local setup. The hosted project (ref `rolbihdglejddolhnzew`) exists but its
+  schema is still empty, so every profile route there will fail until `pnpm db:push` runs.
 - **No sitemap.** `public/robots.txt` references one. Add `@nuxtjs/sitemap` when public
   profiles go live, or remove the reference.
