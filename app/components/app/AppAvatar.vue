@@ -9,6 +9,12 @@
  * Initials are taken by grapheme-ish slicing of the first two words, which works for
  * Arabic as well as Latin names; `Intl.Segmenter` would be more correct but is overkill
  * for two characters.
+ *
+ * DESIGN SYSTEM
+ *   Portraits and logo plates are square with 2px corners — the architectural
+ *   note that keeps the product from reading as a social app. The monogram
+ *   fallback is a navy plate with white display type. `shape="round"` exists for
+ *   the dense admin rows the system draws with circles.
  */
 const props = withDefaults(defineProps<{
   src?: string | null
@@ -17,8 +23,13 @@ const props = withDefaults(defineProps<{
   /** Accessible description. Falls back to the name when omitted. */
   alt?: string
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
+  shape?: 'square' | 'round'
+  /** Monogram styling for a navy surface: translucent plate, hairline border. */
+  inverse?: boolean
 }>(), {
   size: 'md',
+  shape: 'square',
+  inverse: false,
 })
 
 const failed = shallowRef(false)
@@ -28,11 +39,11 @@ watch(() => props.src, () => {
 })
 
 const SIZE_CLASS = {
-  'sm': 'size-8 text-xs',
-  'md': 'size-10 text-sm',
+  'sm': 'size-8 text-2xs',
+  'md': 'size-10 text-xs',
   'lg': 'size-16 text-lg',
-  'xl': 'size-24 text-2xl',
-  '2xl': 'size-32 text-4xl',
+  'xl': 'size-20 text-2xl',
+  '2xl': 'size-28 text-3xl',
 }
 
 const initials = computed(() =>
@@ -50,8 +61,14 @@ const showImage = computed(() => Boolean(props.src) && !failed.value)
 
 <template>
   <span
-    class="inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted font-semibold text-muted-fg"
-    :class="SIZE_CLASS[size]"
+    class="inline-flex shrink-0 items-center justify-center overflow-hidden font-semibold tracking-[0.02em]"
+    :class="[
+      SIZE_CLASS[size],
+      shape === 'round' ? 'rounded-full' : 'rounded-xs',
+      inverse
+        ? 'border border-border-inverse bg-on-navy-10 text-surface-inverse-fg'
+        : 'bg-primary text-primary-fg',
+    ]"
   >
     <img
       v-if="showImage"

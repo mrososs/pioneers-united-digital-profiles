@@ -3,90 +3,46 @@ import type { PublicProfile } from '#shared/types/profile'
 import { useProfileLinks } from '~/composables/useProfileLinks'
 
 /**
- * The action row: save contact, call, e-mail, WhatsApp, copy link.
+ * "Save contact" — the single action the whole page exists to produce.
  *
- * "Save contact" is the primary action — downloading the vCard is the whole point of a
- * digital business card — and it is a real `<a download>` to the server endpoint rather
- * than a JavaScript blob, so it works in the in-app browsers of WhatsApp and LinkedIn
- * where programmatic downloads are frequently blocked.
+ * It is a real `<a download>` pointing at the server endpoint rather than a
+ * JavaScript blob, because programmatic downloads are frequently blocked in the
+ * in-app browsers of WhatsApp and LinkedIn, which is exactly where this link
+ * gets opened.
  *
- * Actions with no underlying data are omitted rather than disabled: a greyed-out "Call"
- * on a profile with no phone number is noise.
+ * The five secondary channels live in `ProfileContactTiles` inside the hero. This
+ * component deliberately carries one control at full width and nothing that
+ * competes with it.
  */
 const props = defineProps<{
   profile: PublicProfile
 }>()
 
 const { t } = useI18n()
-const { vcardUrl, telHref, mailtoHref, whatsappHref, shareUrl } = useProfileLinks(() => props.profile)
-const { copy, copied } = useClipboard()
-
-async function copyShareUrl() {
-  if (shareUrl.value) await copy(shareUrl.value)
-}
+const { vcardUrl } = useProfileLinks(() => props.profile)
 </script>
 
 <template>
-  <div class="flex flex-col gap-3">
+  <div
+    v-if="vcardUrl"
+    class="flex flex-col gap-2.5"
+  >
     <AppButton
-      v-if="vcardUrl"
       :href="vcardUrl"
       download
       variant="primary"
       size="lg"
       block
     >
+      <AppIcon
+        name="id-card"
+        :size="19"
+      />
       {{ t('profile.actions.saveContact') }}
     </AppButton>
 
-    <p class="text-center text-xs text-muted-fg">
+    <p class="text-center text-2xs text-muted-fg">
       {{ t('profile.actions.saveContactHint') }}
     </p>
-
-    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-      <AppButton
-        v-if="telHref"
-        :href="telHref"
-        variant="secondary"
-        size="sm"
-      >
-        {{ t('profile.actions.call') }}
-      </AppButton>
-
-      <AppButton
-        v-if="mailtoHref"
-        :href="mailtoHref"
-        variant="secondary"
-        size="sm"
-      >
-        {{ t('profile.actions.email') }}
-      </AppButton>
-
-      <AppButton
-        v-if="whatsappHref"
-        :href="whatsappHref"
-        variant="secondary"
-        size="sm"
-      >
-        {{ t('profile.actions.whatsapp') }}
-      </AppButton>
-
-      <AppButton
-        v-if="profile.linkedinUrl"
-        :href="profile.linkedinUrl"
-        variant="secondary"
-        size="sm"
-      >
-        {{ t('profile.actions.linkedin') }}
-      </AppButton>
-    </div>
-
-    <AppButton
-      variant="ghost"
-      size="sm"
-      @click="copyShareUrl"
-    >
-      {{ copied ? t('common.actions.copied') : t('common.actions.copyLink') }}
-    </AppButton>
   </div>
 </template>

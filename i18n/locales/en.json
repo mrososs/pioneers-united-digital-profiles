@@ -29,7 +29,8 @@
       "upload": "Upload",
       "remove": "Remove",
       "preview": "Preview",
-      "viewAll": "View all"
+      "viewAll": "View all",
+      "skipToContent": "Skip to content"
     },
     "states": {
       "loading": "Loading…",
@@ -71,9 +72,11 @@
       "contact": "Contact",
       "links": "Links",
       "company": "Company",
+      "companyBadge": "Company profile",
       "share": "Share"
     },
     "actions": {
+      "share": "Share",
       "saveContact": "Save contact",
       "saveContactHint": "Downloads a vCard (.vcf) you can add to your address book",
       "call": "Call",
@@ -107,6 +110,10 @@
   },
   "admin": {
     "title": "Administration",
+    "roles": {
+      "admin": "Administrator",
+      "super_admin": "Super administrator"
+    },
     "nav": {
       "dashboard": "Dashboard",
       "profiles": "Profiles",
@@ -130,7 +137,8 @@
       "signedOut": "You have been signed out."
     },
     "dashboard": {
-      "welcome": "Welcome back{name}",
+      "welcome": "Welcome back",
+      "welcomeNamed": "Welcome back, {name}",
       "totalProfiles": "Profiles",
       "publishedProfiles": "Published",
       "draftProfiles": "Drafts",

@@ -29,7 +29,8 @@
       "upload": "رفع",
       "remove": "إزالة",
       "preview": "معاينة",
-      "viewAll": "عرض الكل"
+      "viewAll": "عرض الكل",
+      "skipToContent": "الانتقال إلى المحتوى"
     },
     "states": {
       "loading": "جارٍ التحميل…",
@@ -71,9 +72,11 @@
       "contact": "التواصل",
       "links": "روابط",
       "company": "الشركة",
+      "companyBadge": "ملف الشركة",
       "share": "مشاركة"
     },
     "actions": {
+      "share": "مشاركة الملف",
       "saveContact": "حفظ جهة الاتصال",
       "saveContactHint": "يتم تنزيل ملف vCard بصيغة ‎.vcf‎ لإضافته إلى دفتر العناوين",
       "call": "اتصال",
@@ -107,6 +110,10 @@
   },
   "admin": {
     "title": "لوحة التحكم",
+    "roles": {
+      "admin": "مسؤول",
+      "super_admin": "مسؤول عام"
+    },
     "nav": {
       "dashboard": "الرئيسية",
       "profiles": "الملفات",
@@ -130,7 +137,8 @@
       "signedOut": "تم تسجيل خروجك."
     },
     "dashboard": {
-      "welcome": "مرحبًا بك{name}",
+      "welcome": "مرحبًا بك",
+      "welcomeNamed": "مرحبًا بك، {name}",
       "totalProfiles": "الملفات",
       "publishedProfiles": "المنشورة",
       "draftProfiles": "المسودات",

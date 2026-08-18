@@ -29,9 +29,19 @@ const { pick } = useLocalizedField()
 
 const { data, status } = await useFetch<OverviewResponse>('/api/admin/overview')
 
-const welcomeSuffix = computed(() => {
+/**
+ * Two keys rather than one with an interpolated suffix.
+ *
+ * The suffix version built the separator in code (`, ${name}`), which put a
+ * Latin comma into the Arabic greeting — Arabic uses `،`. Punctuation is part of
+ * the sentence, so it belongs in the catalogue where a translator can set it,
+ * not in a template literal that both locales share.
+ */
+const welcomeTitle = computed(() => {
   const name = session.value?.fullName
-  return name ? `, ${name}` : ''
+  return name
+    ? t('admin.dashboard.welcomeNamed', { name })
+    : t('admin.dashboard.welcome')
 })
 
 const stats = computed(() => [
@@ -48,7 +58,7 @@ useSeoMeta({
 
 <template>
   <div class="flex flex-col gap-6">
-    <AdminPageHeader :title="t('admin.dashboard.welcome', { name: welcomeSuffix })">
+    <AdminPageHeader :title="welcomeTitle">
       <template #actions>
         <AppButton
           :to="localePath('/admin/profiles/new')"
@@ -82,23 +92,22 @@ useSeoMeta({
 
     <div
       v-else
+      v-reveal.group.now
       class="grid gap-4 sm:grid-cols-3"
     >
-      <AppCard
+      <AdminStat
         v-for="stat in stats"
         :key="stat.key"
-      >
-        <p class="text-sm text-muted-fg">
-          {{ stat.label }}
-        </p>
-        <p class="mt-2 text-3xl font-semibold text-foreground">
-          {{ stat.value }}
-        </p>
-      </AppCard>
+        :label="stat.label"
+        :value="stat.value"
+      />
     </div>
 
-    <section class="flex flex-col gap-3">
-      <h2 class="text-sm font-medium text-muted-fg">
+    <section
+      v-reveal
+      class="flex flex-col gap-3"
+    >
+      <h2 class="pu-eyebrow text-muted-fg">
         {{ t('admin.dashboard.recentlyUpdated') }}
       </h2>
 
@@ -125,11 +134,12 @@ useSeoMeta({
           v-for="profile in data?.recentProfiles ?? []"
           :key="profile.id"
           as="li"
-          padding="sm"
+          padding="none"
+          interactive
         >
           <NuxtLink
             :to="localePath(`/admin/profiles/${profile.id}`)"
-            class="flex items-center gap-3 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+            class="flex items-center gap-3 rounded-lg p-4 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ring"
           >
             <AppAvatar
               :src="profile.photoUrl"
@@ -142,7 +152,7 @@ useSeoMeta({
                 {{ pick(profile.nameEn, profile.nameAr) }}
               </span>
               <span
-                class="block truncate text-xs text-muted-fg"
+                class="pu-mono block truncate text-2xs text-muted-fg"
                 dir="ltr"
               >
                 /{{ profile.slug }}

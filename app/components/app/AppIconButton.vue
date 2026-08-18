@@ -8,15 +8,21 @@ import type { RouteLocationRaw } from 'vue-router'
  * with no accessible name is invisible to a screen reader, so the API makes it
  * impossible to create one — accessibility is enforced by the type, not by review.
  *
- * Sizes stay at or above 40px so the control clears the 44px touch-target guidance
- * once its surrounding padding is counted; public profiles are used on phones.
+ * SIZES
+ *   The design system draws these at 36px for dense admin toolbars. This
+ *   repository's accessibility rule is 40px minimum for icon-only controls, and
+ *   the design system's own `--hit-min` is 44px on profile screens, so `md` is
+ *   40 and `lg` is 44. `sm` (36) matches the system exactly and is reserved for
+ *   table row actions, where the surrounding cell padding carries the target to
+ *   44px.
  */
 type Size = 'sm' | 'md' | 'lg'
+type Variant = 'solid' | 'ghost' | 'outline' | 'danger' | 'inverse'
 
 const props = withDefaults(defineProps<{
   label: string
   size?: Size
-  variant?: 'solid' | 'ghost' | 'outline'
+  variant?: Variant
   to?: RouteLocationRaw
   href?: string
   disabled?: boolean
@@ -29,21 +35,24 @@ const props = withDefaults(defineProps<{
 })
 
 const SIZE_CLASS: Record<Size, string> = {
-  sm: 'size-8 rounded-sm',
-  md: 'size-10 rounded-md',
-  lg: 'size-12 rounded-md',
+  sm: 'size-9',
+  md: 'size-10',
+  lg: 'size-11',
 }
 
-const VARIANT_CLASS = {
-  solid: 'bg-primary text-primary-fg hover:bg-primary-hover',
-  ghost: 'text-foreground hover:bg-muted',
-  outline: 'border border-border text-foreground hover:bg-surface-hover',
+const VARIANT_CLASS: Record<Variant, string> = {
+  solid: 'border-transparent bg-primary text-primary-fg hover:bg-primary-hover',
+  ghost: 'border-transparent text-body hover:bg-surface-hover hover:text-heading',
+  outline: 'border-border-default bg-surface text-body hover:border-border-strong hover:bg-surface-hover hover:text-heading',
+  danger: 'border-transparent text-body hover:border-danger/45 hover:bg-danger-surface hover:text-danger',
+  inverse: 'border-border-inverse text-on-navy-62 hover:bg-on-navy-10 hover:text-surface-inverse-fg',
 }
 
 const classes = computed(() => [
-  'inline-flex items-center justify-center transition-colors',
+  'inline-grid place-items-center rounded-sm border',
+  'transition-[background-color,border-color,color] duration-[160ms] ease-standard',
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring',
-  'disabled:pointer-events-none disabled:opacity-50',
+  'disabled:pointer-events-none disabled:border-transparent disabled:bg-muted disabled:text-faint',
   SIZE_CLASS[props.size],
   VARIANT_CLASS[props.variant],
 ])

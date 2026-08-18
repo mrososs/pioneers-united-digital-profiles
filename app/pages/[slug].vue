@@ -20,7 +20,10 @@ import { toLocaleCode } from '#shared/constants/locales'
  * it, switching locale on /en/sample-executive would lose the slug.
  */
 definePageMeta({
-  layout: 'default',
+  // Not `default`: the design system puts the brand mark and the language
+  // switch on the navy hero rather than in a bar above it, so this route uses a
+  // layout that contributes only the skip link and the mono URL footer.
+  layout: 'profile',
 })
 
 const route = useRoute()

@@ -5,6 +5,9 @@
  * Wrapped in `<nav aria-label>` so it is reachable as a landmark, and the current page is
  * announced through a live region rather than being colour-only. Emits an intent
  * (`update:page`) instead of navigating, so the parent stays in charge of the URL.
+ *
+ * The chevrons are directional glyphs, so they flip under RTL — "previous" must
+ * point towards the start of the reading order in both languages.
  */
 const props = defineProps<{
   page: number
@@ -27,7 +30,7 @@ const to = computed(() => Math.min(props.page * props.perPage, props.total))
 <template>
   <nav
     v-if="totalPages > 1"
-    class="flex flex-wrap items-center justify-between gap-3"
+    class="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3"
     :aria-label="t('common.pagination.page', { page, total: totalPages })"
   >
     <p
@@ -44,10 +47,18 @@ const to = computed(() => Math.min(props.page * props.perPage, props.total))
         :disabled="!canGoBack"
         @click="emit('update:page', page - 1)"
       >
+        <AppIcon
+          name="chevron-left"
+          :size="15"
+          class="rtl:rotate-180"
+        />
         {{ t('common.pagination.previous') }}
       </AppButton>
 
-      <span class="px-1 text-xs text-muted-fg">
+      <!-- `tabular-nums`, not `.pu-num`: this is a translated sentence with a
+           number inside it, so it must follow the page direction. `.pu-num`
+           forces LTR and is only for a bare figure. -->
+      <span class="px-1 text-xs tabular-nums text-muted-fg">
         {{ t('common.pagination.page', { page, total: totalPages }) }}
       </span>
 
@@ -58,6 +69,11 @@ const to = computed(() => Math.min(props.page * props.perPage, props.total))
         @click="emit('update:page', page + 1)"
       >
         {{ t('common.pagination.next') }}
+        <AppIcon
+          name="chevron-right"
+          :size="15"
+          class="rtl:rotate-180"
+        />
       </AppButton>
     </div>
   </nav>

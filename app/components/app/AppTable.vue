@@ -9,6 +9,12 @@
  *     makes the whole page scroll sideways — which on a phone breaks the layout;
  *   * `<caption>` is present but visually hidden, giving screen readers the table's
  *     purpose without adding a visible heading.
+ *
+ * DESIGN SYSTEM
+ *   Header cells are Latin micro-caps on the sand surface, rows are separated by
+ *   hairlines rather than boxed, and the whole table sits inside a card. Column
+ *   headers use `.pu-label-caps` so Arabic drops the tracking and the
+ *   uppercasing instead of rendering broken.
  */
 export interface TableColumn {
   key: string
@@ -34,19 +40,19 @@ defineSlots<{
 </script>
 
 <template>
-  <div class="overflow-x-auto rounded-lg border border-border">
-    <table class="w-full border-collapse text-sm">
+  <div class="overflow-x-auto rounded-lg border border-border bg-surface shadow-card">
+    <table class="w-full border-separate border-spacing-0 text-sm">
       <caption class="sr-only">
         {{ caption }}
       </caption>
 
-      <thead class="bg-muted/60">
+      <thead>
         <tr>
           <th
             v-for="column in columns"
             :key="column.key"
             scope="col"
-            class="px-4 py-3 font-medium text-muted-fg"
+            class="pu-label-caps border-b border-border bg-background px-4 py-3 whitespace-nowrap text-muted-fg"
             :class="[
               column.align === 'end' ? 'text-end' : 'text-start',
               column.hideOnMobile ? 'hidden sm:table-cell' : '',
@@ -65,7 +71,7 @@ defineSlots<{
           >
             <div
               role="status"
-              class="flex flex-col gap-2"
+              class="flex flex-col gap-2.5"
             >
               <AppSkeleton variant="text" />
               <AppSkeleton
@@ -83,7 +89,7 @@ defineSlots<{
         <tr v-else-if="rows.length === 0">
           <td
             :colspan="columns.length"
-            class="px-4 py-6"
+            class="px-4 py-2"
           >
             <slot name="empty" />
           </td>
@@ -93,12 +99,12 @@ defineSlots<{
           v-for="row in rows"
           v-else
           :key="rowKey ? rowKey(row) : row.id"
-          class="border-t border-border transition-colors hover:bg-surface-hover"
+          class="transition-colors duration-[160ms] ease-standard hover:bg-surface-hover"
         >
           <td
             v-for="column in columns"
             :key="column.key"
-            class="px-4 py-3 align-middle"
+            class="border-b border-border px-4 py-3.5 align-middle text-body"
             :class="[
               column.align === 'end' ? 'text-end' : 'text-start',
               column.hideOnMobile ? 'hidden sm:table-cell' : '',

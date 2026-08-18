@@ -34,8 +34,44 @@ export default defineNuxtConfig({
       ],
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
+
+        // Design-system type stack: Archivo (Latin), IBM Plex Sans Arabic
+        // (Arabic), IBM Plex Mono (slugs, URLs, IDs, printed figures).
+        // Preconnect first — a public profile is opened from a QR scan on
+        // mobile data, where the extra round trip to fonts.gstatic.com is the
+        // single most expensive thing on the page.
+        { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
+        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap',
+        },
+      ],
+
+      script: [
+        {
+          // Sets `pu-motion` on <html> before first paint so the scroll-reveal
+          // initial state in main.css applies without a flash of already-placed
+          // content. Three properties matter and each is deliberate:
+          //
+          //   * it never runs for a visitor who asked for reduced motion, so
+          //     that preference is honoured before a single byte of GSAP loads;
+          //   * with JavaScript disabled the class is never set and every
+          //     revealed element renders at its final state;
+          //   * the failsafe removes the class if the motion plugin has not
+          //     reported ready, so a GSAP chunk that fails to arrive degrades
+          //     to a plain page instead of leaving the profile invisible.
+          innerHTML: `(function(){try{if(matchMedia('(prefers-reduced-motion: reduce)').matches)return;var e=document.documentElement;e.classList.add('pu-motion');setTimeout(function(){if(!e.hasAttribute('data-motion-ready'))e.classList.remove('pu-motion')},2500)}catch(_){}})()`,
+          tagPosition: 'head',
+        },
       ],
     },
+
+    // Surfaces are 240ms; a route change is a surface change. GSAP owns motion
+    // inside a page, but the page-to-page crossfade is one CSS rule and does
+    // not need a timeline.
+    pageTransition: { name: 'pu-page', mode: 'out-in' },
+    layoutTransition: false,
   },
 
   css: ['~/assets/css/main.css'],

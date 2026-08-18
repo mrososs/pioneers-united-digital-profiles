@@ -2,9 +2,14 @@
 /**
  * Public layout.
  *
- * Deliberately minimal chrome: a public Digital Profile is a single-purpose page reached
- * from a QR code or a shared link, and navigation the visitor did not ask for competes
- * with the one action that matters (saving the contact).
+ * Deliberately minimal chrome: a public surface reached from a QR code or a shared
+ * link is single-purpose, and navigation the visitor did not ask for competes
+ * with the one action that matters.
+ *
+ * A Digital Profile does not use this layout — it uses `profile`, because the
+ * design system puts the brand mark and the language switch on the navy hero
+ * rather than in a bar above it. This layout serves the landing page, which has
+ * no hero to carry them.
  *
  * The skip link is first in the DOM so keyboard and screen-reader users can jump straight
  * to the content.
@@ -19,14 +24,14 @@ const localePath = useLocalePath()
       href="#main"
       class="pu-skip-link"
     >
-      {{ t('common.actions.back') }}
+      {{ t('common.actions.skipToContent') }}
     </a>
 
     <header class="border-b border-border bg-surface">
-      <div class="mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 py-3">
+      <div class="mx-auto flex max-w-profile-wide items-center justify-between gap-4 px-5 py-3.5 lg:px-10">
         <NuxtLink
           :to="localePath('/')"
-          class="flex items-center gap-2 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+          class="flex items-center gap-2 rounded-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
         >
           <BrandLogo size="sm" />
           <span class="sr-only">{{ t('app.name') }}</span>

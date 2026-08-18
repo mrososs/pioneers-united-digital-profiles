@@ -38,18 +38,28 @@ function goHome() {
 </script>
 
 <template>
-  <div class="flex min-h-dvh items-center justify-center bg-background px-4 py-16">
-    <div class="w-full max-w-md text-center">
-      <p class="font-mono text-sm text-muted-fg">
+  <div class="flex min-h-dvh flex-col items-center justify-center gap-6 bg-background px-5 py-16">
+    <BrandLogo size="md" />
+
+    <div class="flex w-full max-w-md flex-col items-center gap-4 text-center">
+      <p
+        class="pu-mono pu-num text-sm text-faint"
+        dir="ltr"
+      >
         {{ error.statusCode }}
       </p>
 
-      <h1 class="mt-3 text-2xl font-semibold text-foreground">
+      <span
+        class="pu-rule"
+        aria-hidden="true"
+      />
+
+      <h1 class="text-2xl font-semibold text-balance text-heading">
         {{ t(messageKey) }}
       </h1>
 
       <AppButton
-        class="mt-8"
+        class="mt-4"
         @click="goHome"
       >
         {{ t('errors.goHome') }}

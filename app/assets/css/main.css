@@ -4,138 +4,249 @@
    Pioneers United Digital Profiles — design tokens
    ===========================================================================
 
+   SOURCE OF TRUTH
+   ---------------
+   Values below come from the Pioneers United Design System
+   (claude.ai/design — "Pioneers United Design System"), specifically its
+   `tokens/` directory: colors, typography, spacing, radius, elevation, motion
+   and layout. Do not invent a value here; take it from the design system.
+
    HOW THIS FILE IS ORGANISED
    --------------------------
-   1. `:root` declares raw token values as `--pu-*` custom properties.
-   2. `@theme inline` maps those raw values onto Tailwind's semantic token names,
-      which is what generates the utilities (`bg-surface`, `text-primary`, ...).
-      `inline` matters: it makes the generated utilities reference `--pu-*`
-      directly, so a scope that overrides `--pu-*` (dark mode, a per-organization
-      brand override injected at runtime) re-themes the whole UI with no rebuild.
+   1. `:root` declares the raw design-system scales as `--pu-*` custom
+      properties, named exactly as the design system names them.
+   2. `@theme inline` maps those raw values onto Tailwind's semantic token
+      names, which is what generates the utilities (`bg-surface`,
+      `text-muted-fg`, ...). `inline` matters: the generated utilities
+      reference `--pu-*` directly, so a scope that overrides `--pu-*`
+      re-themes the whole UI with no rebuild.
+   3. `@layer base` sets document defaults, including the Arabic overrides.
+   4. `@layer components` carries the handful of design-system signatures that
+      Tailwind cannot express as utilities — the micro-cap eyebrow with its RTL
+      reset, the copper rule, the QR corner ticks, the shimmer, the pulse.
 
    RULES
    -----
    * Components use semantic utilities only: `bg-surface`, `text-muted-fg`,
      `border-border`. Never a raw hex value, never `bg-[#192341]`.
-   * Spacing/radius come from the scale below, not from arbitrary values.
    * RTL: use logical utilities (`ps-*`, `pe-*`, `ms-*`, `me-*`, `text-start`,
      `text-end`, `border-s`, `border-e`). Never `pl-*`/`pr-*`/`text-left`.
-
-   PROVENANCE OF THE CURRENT VALUES
-   --------------------------------
-   The primary (#192341) and accent (#e18146) values are read out of the brand
-   logo supplied with this repository (app/assets/img/pure-development-logo.svg).
-   Everything else is a neutral, accessible placeholder scale. The final palette
-   arrives with the Pioneers United design system; when it does, only the `:root`
-   block below changes.
+   * Latin micro-caps (eyebrows, field labels, table headers) are a brand
+     signature and they break in Arabic. Use `.pu-eyebrow` / `.pu-label-caps`,
+     which drop the tracking and the uppercasing under `[dir="rtl"]`.
    =========================================================================== */
 
 :root {
   color-scheme: light;
 
-  /* --- Brand ------------------------------------------------------------- */
-  --pu-primary: #192341;
-  --pu-primary-hover: #223056;
-  --pu-primary-foreground: #fcfdfd;
-  --pu-accent: #e18146;
-  --pu-accent-hover: #cf6f34;
-  --pu-accent-foreground: #1a1206;
+  /* --- Brand navy -------------------------------------------------------
+     Extracted from the official logo (navy #192341 on off-white #fcfdfd).
+     700 is the brand. 900 is the admin rail. */
+  --pu-navy-900: #0b1020;
+  --pu-navy-800: #101932;
+  --pu-navy-700: #192341;
+  --pu-navy-600: #26315a;
+  --pu-navy-500: #3a4573;
+  --pu-navy-400: #6b7490;
+  --pu-navy-300: #9aa1b4;
+  --pu-navy-200: #c6cad6;
+  --pu-navy-100: #e4e7ee;
+  --pu-navy-50: #f3f5f8;
+  --pu-white: #fcfdfd;
 
-  /* --- Neutrals / surfaces ---------------------------------------------- */
-  --pu-background: #f7f8fa;
-  --pu-foreground: #131722;
+  /* --- Warm neutral (paper) --------------------------------------------- */
+  --pu-sand-50: #faf8f5;
+  --pu-sand-100: #f3f0ea;
+  --pu-sand-200: #e7e2d9;
+  --pu-sand-300: #d6cfc2;
+
+  /* --- Bronze accent ----------------------------------------------------
+     The rule between PURE and DEVELOPMENT in the logo. Restrained: 32x2px
+     rules, QR corner ticks, the company badge, micro-caps on navy. It is
+     never a button fill and never a gradient. */
+  --pu-copper-700: #8a6e3c;
+  --pu-copper-500: #a8894f;
+  --pu-copper-300: #c9b58a;
+  --pu-copper-100: #f0e9da;
+
+  /* --- Semantic base ----------------------------------------------------
+     Three only: green (published), amber (generating/attention),
+     red (destructive/error). */
+  --pu-green-600: #1f7a5c;
+  --pu-green-100: #e3f0ea;
+  --pu-amber-600: #a8752a;
+  --pu-amber-100: #f7eedd;
+  --pu-red-600: #9e2b25;
+  --pu-red-100: #f6e5e3;
+
+  /* --- Text -------------------------------------------------------------- */
+  --pu-text-primary: var(--pu-navy-800);
+  --pu-text-heading: var(--pu-navy-700);
+  --pu-text-body: var(--pu-navy-500);
+  --pu-text-muted: var(--pu-navy-400);
+  --pu-text-faint: var(--pu-navy-300);
+  --pu-text-inverse: var(--pu-white);
+  --pu-text-inverse-muted: rgb(252 253 253 / 0.62);
+  --pu-text-accent: var(--pu-copper-700);
+
+  /* --- Surfaces ---------------------------------------------------------- */
+  --pu-background: var(--pu-sand-50);
   --pu-surface: #ffffff;
-  --pu-surface-hover: #f2f4f7;
-  --pu-surface-inverse: #131722;
-  --pu-surface-inverse-foreground: #f7f8fa;
-
-  --pu-muted: #eef0f4;
-  --pu-muted-foreground: #5b6478;
-
-  --pu-border: #dfe3ea;
-  --pu-border-strong: #c4cad6;
+  --pu-surface-hover: var(--pu-navy-50);
+  --pu-surface-inverse: var(--pu-navy-700);
+  --pu-surface-inverse-foreground: var(--pu-white);
+  --pu-surface-deep: var(--pu-navy-900);
+  --pu-muted: var(--pu-sand-100);
+  --pu-muted-foreground: var(--pu-navy-400);
   --pu-input: #ffffff;
-  --pu-ring: #223056;
+  --pu-input-disabled: var(--pu-sand-100);
+
+  /* --- Borders ----------------------------------------------------------- */
+  --pu-border: rgb(25 35 65 / 0.08);
+  --pu-border-strong: rgb(25 35 65 / 0.28);
+  --pu-border-default: rgb(25 35 65 / 0.14);
+  --pu-border-inverse: rgb(252 253 253 / 0.16);
+
+  /* --- Interactive --------------------------------------------------------- */
+  --pu-primary: var(--pu-navy-700);
+  --pu-primary-hover: var(--pu-navy-800);
+  --pu-primary-active: var(--pu-navy-900);
+  --pu-primary-foreground: var(--pu-white);
+  --pu-accent: var(--pu-copper-500);
+  --pu-accent-hover: var(--pu-copper-700);
+  --pu-accent-foreground: var(--pu-white);
+  --pu-ring: var(--pu-navy-700);
+  --pu-focus-halo: rgb(25 35 65 / 0.16);
 
   /* --- Status ------------------------------------------------------------ */
-  --pu-danger: #b42318;
-  --pu-danger-foreground: #fff5f4;
-  --pu-danger-surface: #fef3f2;
-  --pu-success: #067647;
-  --pu-success-foreground: #f0fdf6;
-  --pu-success-surface: #ecfdf3;
-  --pu-warning: #b54708;
-  --pu-warning-foreground: #fffaf0;
-  --pu-warning-surface: #fffaeb;
-  --pu-info: #175cd3;
-  --pu-info-foreground: #f5f9ff;
-  --pu-info-surface: #eff8ff;
+  --pu-danger: var(--pu-red-600);
+  --pu-danger-foreground: var(--pu-white);
+  --pu-danger-surface: var(--pu-red-100);
+  --pu-success: var(--pu-green-600);
+  --pu-success-foreground: var(--pu-white);
+  --pu-success-surface: var(--pu-green-100);
+  --pu-warning: var(--pu-amber-600);
+  --pu-warning-foreground: var(--pu-white);
+  --pu-warning-surface: var(--pu-amber-100);
+  --pu-info: var(--pu-navy-600);
+  --pu-info-foreground: var(--pu-white);
+  --pu-info-surface: var(--pu-navy-50);
+
+  /* --- Transparency on navy ---------------------------------------------
+     Fixed steps only. The design system uses these and nothing else. */
+  --pu-on-navy-06: rgb(252 253 253 / 0.06);
+  --pu-on-navy-10: rgb(252 253 253 / 0.1);
+  --pu-on-navy-16: rgb(252 253 253 / 0.16);
+  --pu-on-navy-62: rgb(252 253 253 / 0.62);
+  --pu-on-navy-78: rgb(252 253 253 / 0.78);
 }
 
-/* Dark scheme. Kept token-for-token identical to light so every utility keeps
-   working; only the values change. */
+/* Dark scheme.
+
+   NOT part of the Pioneers United design system, which is a light, paper-based
+   system with no dark specimen. It is kept because the application contracts on
+   it (`app/CLAUDE.md`): every token is redefined, so every utility keeps
+   working and no component needs a `dark:` variant. Values are derived from the
+   same navy ramp so the result stays coherent with the brand rather than
+   inventing a second palette. If the design system ships a dark specimen,
+   replace this block wholesale. */
 .dark {
   color-scheme: dark;
 
-  --pu-primary: #5b7bbd;
-  --pu-primary-hover: #6e8bc9;
-  --pu-primary-foreground: #0b0f1a;
-  --pu-accent: #e9915b;
-  --pu-accent-hover: #f0a273;
-  --pu-accent-foreground: #1a1206;
+  --pu-text-primary: #eef1f6;
+  --pu-text-heading: #f6f8fb;
+  --pu-text-body: #c2c8d6;
+  --pu-text-muted: #8f97ab;
+  --pu-text-faint: #6b7490;
+  --pu-text-accent: var(--pu-copper-300);
 
-  --pu-background: #0b0f1a;
-  --pu-foreground: #eef0f4;
-  --pu-surface: #131a2b;
-  --pu-surface-hover: #1b2438;
-  --pu-surface-inverse: #eef0f4;
-  --pu-surface-inverse-foreground: #131722;
+  --pu-background: var(--pu-navy-900);
+  --pu-surface: #121a30;
+  --pu-surface-hover: #1a2340;
+  --pu-surface-inverse: var(--pu-white);
+  --pu-surface-inverse-foreground: var(--pu-navy-800);
+  --pu-surface-deep: #070b16;
+  --pu-muted: #1a2340;
+  --pu-muted-foreground: #8f97ab;
+  --pu-input: #121a30;
+  --pu-input-disabled: #1a2340;
 
-  --pu-muted: #1b2438;
-  --pu-muted-foreground: #9aa4bb;
+  --pu-border: rgb(252 253 253 / 0.1);
+  --pu-border-default: rgb(252 253 253 / 0.16);
+  --pu-border-strong: rgb(252 253 253 / 0.3);
 
-  --pu-border: #24304a;
-  --pu-border-strong: #35446a;
-  --pu-input: #131a2b;
-  --pu-ring: #5b7bbd;
+  --pu-primary: var(--pu-white);
+  --pu-primary-hover: #e4e7ee;
+  --pu-primary-active: #c6cad6;
+  --pu-primary-foreground: var(--pu-navy-800);
+  --pu-accent: var(--pu-copper-300);
+  --pu-accent-hover: var(--pu-copper-100);
+  --pu-accent-foreground: var(--pu-navy-900);
+  --pu-ring: var(--pu-copper-300);
+  --pu-focus-halo: rgb(201 181 138 / 0.24);
 
-  --pu-danger: #f97066;
-  --pu-danger-foreground: #1a0b0a;
-  --pu-danger-surface: #2a1412;
-  --pu-success: #47cd89;
-  --pu-success-foreground: #04140c;
-  --pu-success-surface: #0c2419;
-  --pu-warning: #fdb022;
-  --pu-warning-foreground: #1a1204;
-  --pu-warning-surface: #2a1e08;
-  --pu-info: #53b1fd;
-  --pu-info-foreground: #04101f;
-  --pu-info-surface: #0d1f33;
+  --pu-danger: #e79a94;
+  --pu-danger-foreground: #2a0f0d;
+  --pu-danger-surface: #331614;
+  --pu-success: #7fc9ad;
+  --pu-success-foreground: #06231a;
+  --pu-success-surface: #0d2a20;
+  --pu-warning: #dcb073;
+  --pu-warning-foreground: #241703;
+  --pu-warning-surface: #2c2008;
+  --pu-info: #aeb7cd;
+  --pu-info-foreground: #0b1020;
+  --pu-info-surface: #1a2340;
 }
 
 @theme inline {
-  /* --- Colour tokens ---------------------------------------------------- */
+  /* --- Colour ------------------------------------------------------------
+     Semantic names only. The `--pu-navy-*` / `--pu-copper-*` ramps stay out of
+     `@theme` on purpose: exposing `bg-navy-700` would let a component reach for
+     a raw brand step instead of the role it actually means. */
   --color-background: var(--pu-background);
-  --color-foreground: var(--pu-foreground);
+  --color-foreground: var(--pu-text-primary);
+  --color-heading: var(--pu-text-heading);
+  --color-body: var(--pu-text-body);
+  --color-faint: var(--pu-text-faint);
+
   --color-surface: var(--pu-surface);
   --color-surface-hover: var(--pu-surface-hover);
   --color-surface-inverse: var(--pu-surface-inverse);
   --color-surface-inverse-fg: var(--pu-surface-inverse-foreground);
+  --color-surface-deep: var(--pu-surface-deep);
 
   --color-primary: var(--pu-primary);
   --color-primary-hover: var(--pu-primary-hover);
+  --color-primary-active: var(--pu-primary-active);
   --color-primary-fg: var(--pu-primary-foreground);
   --color-accent: var(--pu-accent);
   --color-accent-hover: var(--pu-accent-hover);
   --color-accent-fg: var(--pu-accent-foreground);
+  --color-accent-surface: var(--pu-copper-100);
 
   --color-muted: var(--pu-muted);
   --color-muted-fg: var(--pu-muted-foreground);
 
   --color-border: var(--pu-border);
+  --color-border-default: var(--pu-border-default);
   --color-border-strong: var(--pu-border-strong);
+  --color-border-inverse: var(--pu-border-inverse);
   --color-input: var(--pu-input);
+  --color-input-disabled: var(--pu-input-disabled);
   --color-ring: var(--pu-ring);
+  /* The standard ring is navy, which is invisible against a navy surface. Any
+     control sitting on the profile hero or the admin rail must switch to this
+     one — a focus indicator that cannot be seen is the same as none. */
+  --color-ring-inverse: var(--pu-white);
+
+  /* Fixed transparency steps on navy. Nothing else may be used on a navy
+     surface — see the design system's "Motion & states" note. */
+  --color-on-navy-06: var(--pu-on-navy-06);
+  --color-on-navy-10: var(--pu-on-navy-10);
+  --color-on-navy-16: var(--pu-on-navy-16);
+  --color-on-navy-62: var(--pu-on-navy-62);
+  --color-on-navy-78: var(--pu-on-navy-78);
 
   --color-danger: var(--pu-danger);
   --color-danger-fg: var(--pu-danger-foreground);
@@ -150,28 +261,94 @@
   --color-info-fg: var(--pu-info-foreground);
   --color-info-surface: var(--pu-info-surface);
 
-  /* --- Radii ------------------------------------------------------------ */
-  --radius-sm: 0.375rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.875rem;
-  --radius-xl: 1.25rem;
-  --radius-2xl: 1.75rem;
+  /* Platform wallet badges — the one place the product sets its own palette
+     aside. Apple and Google each publish an add-to-wallet badge convention, and
+     a visitor recognises the black pill faster than any branded alternative.
+     They are tokens rather than raw hex in the component so the "no raw colour
+     in a component" rule still holds, and so there is one obvious place to
+     change if either platform revises its guidance. Deliberately NOT redefined
+     under `.dark`: the badges look the same everywhere by design. */
+  --color-wallet-dark: #000000;
+  --color-wallet-dark-hover: #1a1a1a;
+  --color-wallet-light: #ffffff;
+  --color-wallet-light-hover: #f8f9fa;
+  --color-wallet-light-fg: #3c4043;
+  --color-wallet-light-border: #dadce0;
+  --color-wallet-light-border-hover: #d2d5d9;
 
-  /* --- Typography -------------------------------------------------------
-     System stacks so the app has zero external font requests until the design
-     system specifies the real faces. `--font-arabic` is applied by the `dir`
-     attribute selector below, so Arabic never renders in a Latin fallback. */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-arabic: 'Segoe UI', Tahoma, 'Noto Naskh Arabic', 'Geeza Pro', 'Arabic Typesetting', sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  /* --- Radii --------------------------------------------------------------
+     Architectural restraint: nothing softer than 8px except pills on status
+     chips, and 12px on bottom sheets and the phone frame. Portrait and logo
+     plates are square with 2px corners. */
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
 
-  /* --- Elevation -------------------------------------------------------- */
-  --shadow-card: 0 1px 2px 0 rgb(19 23 34 / 0.06), 0 1px 3px 0 rgb(19 23 34 / 0.1);
-  --shadow-raised: 0 4px 6px -2px rgb(19 23 34 / 0.05), 0 12px 16px -4px rgb(19 23 34 / 0.1);
-  --shadow-overlay: 0 8px 8px -4px rgb(19 23 34 / 0.04), 0 20px 24px -4px rgb(19 23 34 / 0.1);
+  /* --- Typography ---------------------------------------------------------
+     Archivo for Latin, IBM Plex Sans Arabic for Arabic, IBM Plex Mono for
+     slugs, URLs, IDs and printed figures. The Arabic face is applied by the
+     `[dir="rtl"]` rule in the base layer, so no component names a font. */
+  --font-sans: 'Archivo', 'Helvetica Neue', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-arabic: 'IBM Plex Sans Arabic', 'Archivo', 'Segoe UI', Tahoma, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-  /* --- Motion ----------------------------------------------------------- */
+  /* Body is 15px, controls and tables 14px, meta 12–13px. */
+  --text-3xs: 11px;
+  --text-3xs--line-height: 1.45;
+  --text-2xs: 12px;
+  --text-2xs--line-height: 1.45;
+  --text-xs: 13px;
+  --text-xs--line-height: 1.5;
+  --text-sm: 14px;
+  --text-sm--line-height: 1.5;
+  --text-base: 15px;
+  --text-base--line-height: 1.6;
+  --text-md: 16px;
+  --text-md--line-height: 1.55;
+  --text-lg: 18px;
+  --text-lg--line-height: 1.4;
+  --text-xl: 20px;
+  --text-xl--line-height: 1.3;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 1.18;
+  --text-3xl: 30px;
+  --text-3xl--line-height: 1.12;
+  --text-4xl: 38px;
+  --text-4xl--line-height: 1.08;
+  --text-5xl: 48px;
+  --text-5xl--line-height: 1.05;
+
+  /* Display sizes are always 600 weight with −0.022em tracking, never 700. */
+  --tracking-display: -0.022em;
+  --tracking-tight: -0.012em;
+  --tracking-eyebrow: 0.18em;
+  --tracking-label: 0.09em;
+
+  /* --- Elevation ----------------------------------------------------------
+     Hairline first. A shadow so faint it reads as a lift rather than a glow.
+     Menus and dialogs get real elevation; nothing else does. */
+  --shadow-card: 0 1px 2px rgb(11 16 32 / 0.05);
+  --shadow-raised: 0 10px 24px -16px rgb(11 16 32 / 0.2);
+  --shadow-overlay: 0 24px 56px -28px rgb(11 16 32 / 0.3);
+  --shadow-modal: 0 32px 80px -32px rgb(11 16 32 / 0.42);
+  /* Field focus: the 3px halo that sits outside the 2px navy border. */
+  --shadow-focus: 0 0 0 3px var(--pu-focus-halo);
+  --shadow-focus-danger: 0 0 0 3px rgb(158 43 37 / 0.14);
+
+  /* --- Motion -------------------------------------------------------------
+     160ms for controls, 240ms for surfaces. */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-emphasised: cubic-bezier(0.2, 0, 0, 1);
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Layout -------------------------------------------------------------
+     1280px admin container, 1080px profile content, 430px mobile profile
+     column. */
+  --container-profile: 430px;
+  --container-profile-wide: 1080px;
+  --container-admin: 1280px;
 }
 
 @layer base {
@@ -181,27 +358,55 @@
 
   body {
     background-color: var(--color-background);
-    color: var(--color-foreground);
+    color: var(--color-body);
     font-family: var(--font-sans);
+    font-size: var(--text-base);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
-  /* Arabic gets its own stack, driven purely by the document direction that
-     useLocaleHead() sets. No component needs to know about fonts. */
+  /* Arabic sits taller than Latin at the same size and never takes tracking.
+     Driven purely by the document direction that useLocaleHead() sets, so no
+     component needs to know about fonts. */
   [dir='rtl'] body,
   [lang^='ar'] body {
     font-family: var(--font-arabic);
+    line-height: 1.75;
+    letter-spacing: 0;
   }
 
-  /* A single, consistent focus ring for the whole application. Accessibility is
-     a requirement, not a polish step. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-heading);
+    font-weight: 600;
+    letter-spacing: var(--tracking-tight);
+  }
+
+  [dir='rtl'] h1,
+  [dir='rtl'] h2,
+  [dir='rtl'] h3,
+  [dir='rtl'] h4,
+  [dir='rtl'] h5,
+  [dir='rtl'] h6 {
+    letter-spacing: 0;
+    line-height: 1.45;
+  }
+
+  /* A single, consistent focus ring for the whole application: a 2px navy ring
+     plus a 3px halo. Accessibility is a requirement, not a polish step. */
   :focus-visible {
     outline: 2px solid var(--color-ring);
     outline-offset: 2px;
   }
 
-  /* Respect the user's reduced-motion preference everywhere. */
+  /* Respect the user's reduced-motion preference everywhere. The GSAP layer
+     checks the same query before it builds a single timeline, so this is a
+     backstop for CSS transitions rather than the only guard. */
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -222,15 +427,221 @@
     top: 0.5rem;
     z-index: 100;
     transform: translateY(-200%);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
     background-color: var(--color-primary);
     color: var(--color-primary-fg);
     padding: 0.5rem 0.875rem;
-    font-size: 0.875rem;
-    transition: transform 150ms var(--ease-emphasised);
+    font-size: var(--text-sm);
+    transition: transform 160ms var(--ease-standard);
   }
 
   .pu-skip-link:focus {
     transform: translateY(0);
+  }
+
+  /* --- Latin micro-caps -------------------------------------------------
+     A brand signature: 0.18em eyebrows and 0.09em field labels. Both break
+     under Arabic, which takes neither tracking nor uppercasing, so the RTL
+     reset is part of the class rather than something each call site
+     remembers. */
+  .pu-eyebrow {
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+  }
+
+  .pu-label-caps {
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-label);
+    text-transform: uppercase;
+  }
+
+  [dir='rtl'] .pu-eyebrow,
+  [dir='rtl'] .pu-label-caps {
+    letter-spacing: 0;
+    text-transform: none;
+    font-size: var(--text-xs);
+  }
+
+  /* Slugs, URLs, IDs and printed figures. */
+  .pu-mono {
+    font-family: var(--font-mono);
+    letter-spacing: 0.01em;
+    font-variant-ligatures: none;
+  }
+
+  /* Numbers stay LTR and tabular even on an Arabic page, so +966… and
+     1,024 do not reorder. */
+  .pu-num {
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+    unicode-bidi: embed;
+  }
+
+  /* The copper rule from the logo: 32x2px, the only decorative use of the
+     accent. `--pu-rule-w` lets a call site widen it without a new class, and
+     the GSAP hero timeline animates it from 0. */
+  .pu-rule {
+    display: block;
+    inline-size: var(--pu-rule-w, 32px);
+    block-size: 2px;
+    background-color: var(--color-accent);
+  }
+
+  /* Copper corner ticks around a QR code. Logical insets so they mirror. */
+  .pu-qr-frame {
+    position: relative;
+    background-color: #ffffff;
+  }
+
+  .pu-qr-frame::before,
+  .pu-qr-frame::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--pu-copper-500);
+  }
+
+  .pu-qr-frame::before {
+    top: 0;
+    inset-inline-start: 0;
+    border-inline-end: 0;
+    border-bottom: 0;
+  }
+
+  .pu-qr-frame::after {
+    bottom: 0;
+    inset-inline-end: 0;
+    border-inline-start: 0;
+    border-top: 0;
+  }
+
+  /* The single architectural motif on the navy hero: an outline circle
+     bleeding off the trailing top corner. Decorative, so it is inert. */
+  .pu-hero-motif::after {
+    content: '';
+    position: absolute;
+    inset-inline-end: -60px;
+    top: -70px;
+    width: 220px;
+    height: 220px;
+    border: 1px solid var(--color-on-navy-06);
+    border-radius: 9999px;
+    pointer-events: none;
+  }
+
+  /* Skeleton shimmer. One of only two things in the system that animate on
+     their own; disabled under prefers-reduced-motion by the base layer. */
+  .pu-shimmer {
+    background-image: linear-gradient(
+      90deg,
+      var(--pu-sand-100) 0%,
+      var(--pu-sand-50) 48%,
+      var(--pu-sand-100) 100%
+    );
+    background-size: 220% 100%;
+    animation: pu-shimmer 1.5s linear infinite;
+  }
+
+  @keyframes pu-shimmer {
+    from {
+      background-position: 100% 0;
+    }
+
+    to {
+      background-position: -120% 0;
+    }
+  }
+
+  /* The "generating" status pulse — the other self-animating element. */
+  .pu-pulse {
+    animation: pu-pulse 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  }
+
+  @keyframes pu-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.45;
+    }
+  }
+
+  /* Dialog entry. Referenced by AppModal through an `animate-[…]` utility, so
+     the keyframes have to be reachable from the stylesheet rather than declared
+     inline. */
+  @keyframes pu-dialog-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* The only blur in the system: the sticky admin top bar. */
+  .pu-sticky-bar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    backdrop-filter: blur(8px);
+    background-color: color-mix(in srgb, var(--color-surface) 82%, transparent);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Scroll-reveal initial state.
+   ---------------------------------------------------------------------------
+   `pu-motion` is set on <html> by a tiny inline script in nuxt.config, before
+   first paint, and only when the visitor has not asked for reduced motion.
+   Without it every `[data-reveal]` element renders at its final state, so the
+   page is complete with JavaScript disabled, with GSAP failing to load, and for
+   a crawler. The same script removes the class again if the motion plugin has
+   not reported ready shortly after load — content must never be left hidden by
+   a script that did not arrive.
+
+   Deliberately outside `@layer components`: this has to beat Tailwind's
+   `opacity-*` utilities in the cascade, and layered rules lose to unlayered
+   ones regardless of specificity.
+   --------------------------------------------------------------------------- */
+html.pu-motion [data-reveal],
+html.pu-motion [data-reveal-group] > * {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+/* ---------------------------------------------------------------------------
+   Route transition (`app.pageTransition` in nuxt.config).
+   Surfaces are 240ms. A crossfade with a 4px rise, nothing more: the design
+   system's motion rule is that nothing scales, bounces or slides decoratively.
+   --------------------------------------------------------------------------- */
+.pu-page-enter-active,
+.pu-page-leave-active {
+  transition:
+    opacity 240ms var(--ease-standard),
+    transform 240ms var(--ease-standard);
+}
+
+.pu-page-enter-from {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.pu-page-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pu-page-enter-from,
+  .pu-page-leave-to {
+    transform: none;
   }
 }

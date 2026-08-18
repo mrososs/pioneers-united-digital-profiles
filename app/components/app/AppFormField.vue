@@ -5,6 +5,13 @@
  * Exists so that the wiring accessibility depends on — `for`/`id`, `aria-describedby`,
  * `aria-invalid`, `role="alert"` — is written once and cannot be forgotten per form.
  * It hands the resolved ids to its slot so the control inside can bind them.
+ *
+ * DESIGN SYSTEM
+ *   Field labels are Latin micro-caps: 12px, 600, 0.09em, uppercase. That is a
+ *   brand signature and it breaks in Arabic, which takes neither tracking nor
+ *   case changes — `.pu-label-caps` carries the RTL reset so no call site has to
+ *   remember it. The optional marker is pushed to the trailing edge with
+ *   `ms-auto`, which mirrors correctly.
  */
 const props = defineProps<{
   label: string
@@ -14,6 +21,8 @@ const props = defineProps<{
   /** Translated message. Presence is what marks the field invalid. */
   error?: string | null
   required?: boolean
+  /** Renders an "optional" marker at the trailing edge of the label row. */
+  optionalLabel?: string
 }>()
 
 const generatedId = useId()
@@ -32,7 +41,7 @@ const describedBy = computed(() => {
   <div class="flex flex-col gap-1.5">
     <label
       :for="controlId"
-      class="text-sm font-medium text-foreground"
+      class="pu-label-caps flex items-center gap-1.5 text-muted-fg"
     >
       {{ label }}
       <span
@@ -40,6 +49,10 @@ const describedBy = computed(() => {
         class="text-danger"
         aria-hidden="true"
       >*</span>
+      <span
+        v-if="optionalLabel && !required"
+        class="ms-auto text-2xs font-normal tracking-normal text-faint normal-case"
+      >{{ optionalLabel }}</span>
     </label>
 
     <slot
@@ -51,7 +64,7 @@ const describedBy = computed(() => {
     <p
       v-if="hint && !error"
       :id="hintId"
-      class="text-xs text-muted-fg"
+      class="text-2xs text-muted-fg"
     >
       {{ hint }}
     </p>
@@ -59,9 +72,13 @@ const describedBy = computed(() => {
     <p
       v-if="error"
       :id="errorId"
-      class="text-xs text-danger"
+      class="flex items-center gap-1.5 text-2xs text-danger"
       role="alert"
     >
+      <AppIcon
+        name="circle-alert"
+        :size="14"
+      />
       {{ error }}
     </p>
   </div>

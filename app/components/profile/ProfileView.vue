@@ -13,6 +13,30 @@ import type { WalletAvailability } from '#shared/types/wallet'
  *   `profileType` branch below is the entire difference.
  *
  * The page above this component owns data fetching and SEO; this owns arrangement only.
+ *
+ * LAYOUT
+ *   Mobile-first, in the design system's 430px column: hero, save contact,
+ *   wallet, QR, about, links, company. From `lg` the same blocks reflow into the
+ *   system's desktop adaptation — 1080px of content with the QR and wallet
+ *   lifted into a sticky 340px panel beside the reading column, because on a
+ *   desktop the QR is the thing a visitor points a phone at while the page stays
+ *   open.
+ *
+ *   ONE INSTANCE OF EVERY BLOCK
+ *   The reflow is done with explicit grid placement, not by rendering a mobile
+ *   copy and a desktop copy and hiding one with `lg:hidden`. Two copies would be
+ *   two copies in the DOM at every viewport: a screen reader announces the QR
+ *   panel twice, the QR endpoint is fetched twice, and any id inside the block
+ *   is duplicated. Placement moves the same nodes instead.
+ *
+ *   DOM order is actions → panel → content, which is the correct reading order
+ *   on a phone. At `lg` the panel is pinned to column two spanning both rows, so
+ *   the reading column reads actions → content with the panel alongside.
+ *
+ * MOTION
+ *   `v-reveal` on each block below the fold. The hero animates on mount instead,
+ *   since it is already in view. Nothing is pinned or parallaxed: the design
+ *   system's motion rule allows the entrance and nothing beyond it.
  */
 const props = defineProps<{
   profile: PublicProfile
@@ -25,38 +49,68 @@ const isCompany = computed(() => props.profile.profileType === 'company')
 </script>
 
 <template>
-  <article class="mx-auto flex w-full max-w-2xl flex-col gap-8 px-4 py-8 sm:py-12">
-    <ProfileIdentity
-      :profile="profile"
-      heading-level="h1"
-    />
+  <article>
+    <ProfileHero :profile="profile" />
 
-    <section
-      v-if="profile.bio"
-      class="flex flex-col gap-2"
-    >
-      <h2 class="text-sm font-medium text-muted-fg">
-        {{ t('profile.sections.about') }}
-      </h2>
-      <p class="text-sm leading-relaxed text-pretty text-foreground">
-        {{ profile.bio }}
-      </p>
-    </section>
+    <div class="mx-auto w-full max-w-profile px-5 py-8 lg:max-w-profile-wide lg:px-10 lg:py-12">
+      <div class="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-x-10">
+        <div
+          v-reveal
+          class="lg:col-start-1 lg:row-start-1"
+        >
+          <ProfileContactActions :profile="profile" />
+        </div>
 
-    <ProfileContactActions :profile="profile" />
+        <!-- QR and wallet. Second in the DOM so a phone reads
+             actions → wallet → QR → content, which is the design system's
+             mobile order; pinned to column two from `lg`. -->
+        <aside class="flex flex-col gap-8 lg:sticky lg:top-10 lg:col-start-2 lg:row-span-2 lg:row-start-1">
+          <ProfileWalletActions
+            v-reveal
+            :profile="profile"
+            :availability="walletAvailability"
+            class="lg:order-2"
+          />
 
-    <ProfileLinkList :links="profile.links" />
+          <div
+            v-reveal
+            class="lg:order-1"
+          >
+            <ProfileQrCard :profile="profile" />
+          </div>
+        </aside>
 
-    <ProfileWalletActions
-      :profile="profile"
-      :availability="walletAvailability"
-    />
+        <div class="flex flex-col gap-8 lg:col-start-1 lg:row-start-2">
+          <section
+            v-if="profile.bio"
+            v-reveal
+            class="flex flex-col gap-3"
+          >
+            <h2 class="pu-eyebrow text-muted-fg">
+              {{ t('profile.sections.about') }}
+            </h2>
+            <p class="text-base leading-relaxed text-pretty text-body">
+              {{ profile.bio }}
+            </p>
+          </section>
 
-    <ProfileQrCard :profile="profile" />
+          <!-- The emptiness check is here, not only inside the component: a
+               runtime directive needs an element to attach to, and a component
+               whose root is `v-if`-ed away renders a comment node. `v-reveal`
+               on it directly would warn and silently do nothing. -->
+          <ProfileLinkList
+            v-if="profile.links.length > 0"
+            v-reveal
+            :links="profile.links"
+          />
 
-    <ProfileCompanyCard
-      v-if="!isCompany"
-      :organization="profile.organization"
-    />
+          <ProfileCompanyCard
+            v-if="!isCompany"
+            v-reveal
+            :organization="profile.organization"
+          />
+        </div>
+      </div>
+    </div>
   </article>
 </template>
