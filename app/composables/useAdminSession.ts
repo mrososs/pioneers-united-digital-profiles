@@ -14,15 +14,23 @@ import type { AdminSession } from '#shared/types/session'
  *
  * `useState` keys the value into the Nuxt payload so an SSR-rendered dashboard does not
  * re-request the session on hydration.
+ *
+ * `refresh` uses `useRequestFetch()`, not the ambient `$fetch`: on the server, the global
+ * `$fetch` does not forward the incoming request's cookies, so a call from middleware
+ * during SSR would reach `/api/admin/session` looking anonymous, send an authenticated
+ * visitor to the login screen, and then bounce back once client-side hydration re-ran the
+ * check with the browser's real cookies — a login flash plus a hydration mismatch on every
+ * hard navigation into the dashboard. `useRequestFetch()` forwards those headers.
  */
 export function useAdminSession() {
   const session = useState<AdminSession | null>('admin-session', () => null)
   const pending = useState<boolean>('admin-session-pending', () => false)
+  const requestFetch = useRequestFetch()
 
   async function refresh(): Promise<AdminSession | null> {
     pending.value = true
     try {
-      const response = await $fetch<{ session: AdminSession | null }>('/api/admin/session')
+      const response = await requestFetch<{ session: AdminSession | null }>('/api/admin/session')
       session.value = response.session
       return response.session
     }

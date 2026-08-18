@@ -84,7 +84,11 @@ insert into auth.users (
   raw_app_meta_data,
   raw_user_meta_data,
   created_at,
-  updated_at
+  updated_at,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change
 )
 values (
   '22222222-2222-4222-8222-222222222222',
@@ -99,7 +103,15 @@ values (
   -- metadata, because the user can write to it. The role lives in admin_users.
   '{"full_name": "Dev Administrator"}'::jsonb,
   now(),
-  now()
+  now(),
+  -- GoTrue scans these as non-nullable Go strings. Inserting directly (rather
+  -- than through the Auth API, which always sets them) leaves them NULL, which
+  -- v2.195.0 fails to scan with "converting NULL to string is unsupported" on
+  -- the very first password grant. Empty string, not NULL.
+  '',
+  '',
+  '',
+  ''
 )
 on conflict (id) do nothing;
 

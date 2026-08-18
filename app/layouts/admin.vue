@@ -50,8 +50,11 @@ async function signOut() {
       {{ t('common.actions.skipToContent') }}
     </a>
 
-    <!-- Navy rail: persistent from lg, a header with a disclosure panel below. -->
-    <aside class="flex flex-col bg-surface-deep text-on-navy-62 lg:min-h-dvh lg:w-62 lg:shrink-0">
+    <!-- Navy rail: persistent from lg, a header with a disclosure panel below.
+         Pinned with `sticky` rather than `fixed` so it never leaves the flex
+         row's layout flow; `self-start` stops it stretching to the row's
+         height, which would otherwise give `sticky` no room to move. -->
+    <aside class="flex flex-col bg-surface-deep text-on-navy-62 lg:sticky lg:top-0 lg:h-dvh lg:w-62 lg:shrink-0 lg:self-start">
       <div class="flex items-center justify-between gap-3 border-b border-border-inverse px-4 py-4">
         <NuxtLink
           :to="localePath('/admin')"
