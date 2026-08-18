@@ -31,6 +31,7 @@
     "@nuxtjs/i18n": "^10.6.0",
     "@nuxtjs/supabase": "^2.0.10",
     "@supabase/supabase-js": "^2.112.3",
+    "gsap": "^3.15.0",
     "nuxt": "^4.5.2",
     "qrcode": "^1.5.4",
     "vue": "^3.5.41",
