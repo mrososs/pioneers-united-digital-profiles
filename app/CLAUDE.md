@@ -132,19 +132,45 @@ The document's `dir` is set by `useLocaleHead()` in `app.vue`. Nothing else shou
 
 ## Design tokens
 
-Tokens are defined once, in `app/assets/css/main.css`, as `--pu-*` values mapped through
-`@theme inline` onto Tailwind's semantic names.
+The values come from the **Pioneers United Design System** (claude.ai/design). They are
+defined once, in `app/assets/css/main.css`, as `--pu-*` raw scales mapped through
+`@theme inline` onto Tailwind's semantic names. Take a value from the design system; never
+invent one.
 
 **Use only semantic utilities:**
 
 ```text
-bg-background  bg-surface  bg-surface-hover  bg-muted
-text-foreground  text-muted-fg
-bg-primary  text-primary-fg  bg-accent  text-accent-fg
-border-border  border-border-strong  outline-ring
+bg-background  bg-surface  bg-surface-hover  bg-muted  bg-surface-inverse  bg-surface-deep
+text-foreground  text-heading  text-body  text-muted-fg  text-faint  text-surface-inverse-fg
+bg-primary  text-primary-fg  text-accent  bg-accent-surface
+border-border  border-border-default  border-border-strong  border-border-inverse
+outline-ring    outline-ring-inverse    (the inverse ring on navy — see below)
 bg-danger  bg-danger-surface  text-danger   (also success / warning / info)
-rounded-sm|md|lg|xl   shadow-card|raised|overlay
+rounded-xs|sm|md|lg|xl        2px · 4px · 6px · 8px · 12px
+shadow-card|raised|overlay|modal|focus
+text-3xs|2xs|xs|sm|base|md|lg|xl|2xl|3xl|4xl|5xl      11 · 12 · 13 · 14 · 15 · 16 · 18 · 20 · 24 · 30 · 38 · 48px
+tracking-display|tight|eyebrow|label
+ease-standard                 cubic-bezier(.2,0,0,1)
+max-w-profile|profile-wide|admin              430 · 1080 · 1280px
 ```
+
+**Transparency on navy is fixed.** On any navy surface (the profile hero, the admin rail,
+the inverse card) use only `bg-on-navy-06`, `bg-on-navy-10`, `bg-on-navy-16`,
+`text-on-navy-62`, `text-on-navy-78` and `border-border-inverse`. Those five steps are the
+whole vocabulary — a lighter navy or an ad-hoc `white/25` is off-system.
+
+**The focus ring has two variants.** `outline-ring` is navy and is invisible against a navy
+surface. Every control on the hero or the rail must use `outline-ring-inverse`.
+
+**Latin micro-caps break in Arabic.** Eyebrows (0.18em) and field labels (0.09em) are a
+brand signature and Arabic takes neither tracking nor case changes. Use the `.pu-eyebrow`
+and `.pu-label-caps` classes, which carry the RTL reset, rather than composing
+`tracking-eyebrow uppercase` at the call site and forgetting it.
+
+**Other `.pu-*` signatures** in `main.css`, for things Tailwind cannot express:
+`.pu-rule` (the 32×2px copper rule; widen with `--pu-rule-w`), `.pu-qr-frame` (copper corner
+ticks), `.pu-hero-motif` (the outline circle), `.pu-mono`, `.pu-num`, `.pu-shimmer`,
+`.pu-pulse`, `.pu-sticky-bar`.
 
 **Never:**
 
@@ -156,8 +182,52 @@ If a design needs a variant that does not exist, add it to the component's varia
 (e.g. `AppButton`'s `VARIANT_CLASS`) rather than passing utility classes in from a page.
 That keeps the design system enumerable.
 
-Dark mode already works: `.dark` redefines the same `--pu-*` values, so every utility
-follows. Do not add `dark:` variants for colour — the token handles it.
+Dark mode still works: `.dark` redefines the same `--pu-*` values, so every utility
+follows. Do not add `dark:` variants for colour — the token handles it. Note that the
+design system itself ships **no dark specimen**; the `.dark` block is derived from the same
+navy ramp to keep the application's existing contract, and should be replaced wholesale if
+a dark specimen ever arrives.
+
+---
+
+## Icons
+
+One set, in `app/utils/icons.ts`, rendered by `<AppIcon name="…" />`. Lucide line icons
+(stroke 1.75, 24px grid) plus five solid brand marks copied out of the design system.
+
+- 20px in UI, 17–19px inside buttons, 15–16px in table rows and fields.
+- Icons inherit `currentColor` and are `aria-hidden` by default. Pass `title` only when the
+  glyph is the *sole* carrier of meaning; an icon-only control gets its name from
+  `AppIconButton`'s required `label` instead.
+- If a glyph is missing, take it from Lucide and add it to the map. Do not draw one, do not
+  use an emoji, and do not add an icon-font dependency.
+
+---
+
+## Motion
+
+GSAP with ScrollTrigger, wired in `app/plugins/motion.ts`. The design system's motion rule
+is that **nothing scales, bounces or slides decoratively** — scroll reveal is opacity plus a
+short rise on the system's own curve, and nothing more. No parallax, no pinning.
+
+| Tool | Use for |
+|---|---|
+| `v-reveal` | Fade + 14px rise when the element scrolls into view. The default. |
+| `v-reveal.now` | Same, but on mount. For above-the-fold content that would never get a scroll event. |
+| `v-reveal.group` | Staggers the element's **children** instead of the element. |
+| `v-reveal="0.2"` / `v-reveal="{ y, delay, duration, stagger, start }"` | Tuning. A bare number is a delay. |
+| `v-count-up="n"` | Counts a dashboard figure up from zero. Takes the number, not the rendered text. |
+| `useMotion(rootRef)` | A real timeline: several elements in order, or a property `v-reveal` does not touch. Auto-disposed. |
+
+Three things must all hold before an element starts hidden, and each is an independent
+guard: the visitor has not asked for reduced motion, JavaScript ran, and the motion plugin
+reported ready before the inline failsafe in `nuxt.config.ts` expired. **Content must never
+be left invisible by a script that did not arrive.** If you add a fourth way to hide
+something, give it the same three guards.
+
+A runtime directive needs an element. `v-reveal` on a component whose root is `v-if`-ed
+away attaches to a comment node and silently does nothing — put the `v-if` on the usage
+site, as `ProfileView` does for `ProfileLinkList`.
 
 ---
 

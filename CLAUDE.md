@@ -328,10 +328,21 @@ Accurate as of the bootstrap. Update this section as things change.
   involves. Requires credentials from the client.
 - **The photo uploader and link editor have no UI.** The server endpoints
   (`/api/admin/media/upload`, `links` on the profile payload) are complete and enforced;
-  the dashboard controls are the natural first addition once the design system lands.
-- **Design tokens are placeholders.** `--pu-primary: #192341` and `--pu-accent: #e18146`
-  were read out of the supplied brand logo. The rest is a neutral accessible scale. When
-  the design system arrives, only the `:root` block in `app/assets/css/main.css` changes.
+  the dashboard controls are the natural first addition.
+- **The design system has landed.** `app/assets/css/main.css` now carries the Pioneers
+  United token set (navy ramp, sand paper, bronze accent, Archivo / IBM Plex Sans Arabic /
+  IBM Plex Mono, the 4px scale, the 8px-max radii and the two-tier elevation) taken from
+  the design-system project on claude.ai/design. Icons are in `app/utils/icons.ts`. Read
+  `app/CLAUDE.md` before touching any of it.
+- **The type stack is a substitution.** The design system could not read the webfonts from
+  pioneersunited.com (Next.js font pipeline), so Archivo and IBM Plex Sans Arabic are the
+  closest Google Fonts matches. When the real font files arrive, only the `<link>` in
+  `nuxt.config.ts` and `--font-sans` / `--font-arabic` in `main.css` change.
+- **No photography.** `AppAvatar` renders a navy monogram plate until real portraits are
+  supplied; passing a `src` is all that is needed to switch.
+- **Motion is GSAP + ScrollTrigger** (`app/plugins/motion.ts`), kept to entrance reveals
+  only. The design system's rule is that nothing scales, bounces or slides decoratively;
+  do not add parallax or pinning without agreeing to change that rule first.
 - **Migrations have not been executed against a live database yet.** They were authored
   but Docker was unavailable in the bootstrap environment. Run `pnpm db:reset` as the
   first step of local setup and fix anything it reports.
