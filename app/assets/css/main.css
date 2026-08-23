@@ -287,11 +287,11 @@
   --radius-xl: 12px;
 
   /* --- Typography ---------------------------------------------------------
-     Archivo for Latin, IBM Plex Sans Arabic for Arabic, IBM Plex Mono for
-     slugs, URLs, IDs and printed figures. The Arabic face is applied by the
-     `[dir="rtl"]` rule in the base layer, so no component names a font. */
+     Archivo for Latin, Tajawal for Arabic, IBM Plex Mono for slugs, URLs,
+     IDs and printed figures. The Arabic face is applied by the `[dir="rtl"]`
+     rule in the base layer, so no component names a font. */
   --font-sans: 'Archivo', 'Helvetica Neue', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-arabic: 'IBM Plex Sans Arabic', 'Archivo', 'Segoe UI', Tahoma, sans-serif;
+  --font-arabic: 'Tajawal', 'Archivo', 'Segoe UI', Tahoma, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
   /* Body is 15px, controls and tables 14px, meta 12–13px. */
@@ -387,6 +387,12 @@
     letter-spacing: var(--tracking-tight);
   }
 
+  /* Tajawal ships no 600 weight (400/500/700/800 only), and the browser's
+     font-matching resolves an unmet 600 request upward to 700 — a true bold
+     that breaks the system's "600, never 700" display rule. 500 is the
+     nearest available face below that line, so it is pinned explicitly
+     rather than left to font-matching. See the matching `.font-semibold`
+     override below for the same reason. */
   [dir='rtl'] h1,
   [dir='rtl'] h2,
   [dir='rtl'] h3,
@@ -395,6 +401,13 @@
   [dir='rtl'] h6 {
     letter-spacing: 0;
     line-height: 1.45;
+    font-weight: 500;
+  }
+
+  /* Same substitution, for every place that reaches for the utility instead
+     of a heading tag (card titles, labels, admin nav). */
+  [dir='rtl'] .font-semibold {
+    font-weight: 500;
   }
 
   /* A single, consistent focus ring for the whole application: a 2px navy ring
@@ -463,6 +476,8 @@
     letter-spacing: 0;
     text-transform: none;
     font-size: var(--text-xs);
+    /* Tajawal has no 600 weight; pin 500 rather than let it resolve to 700. */
+    font-weight: 500;
   }
 
   /* Slugs, URLs, IDs and printed figures. */

@@ -375,14 +375,18 @@ Accurate as of the bootstrap. Update this section as things change.
   (`/api/admin/media/upload`, `links` on the profile payload) are complete and enforced;
   the dashboard controls are the natural first addition.
 - **The design system has landed.** `app/assets/css/main.css` now carries the Pioneers
-  United token set (navy ramp, sand paper, bronze accent, Archivo / IBM Plex Sans Arabic /
-  IBM Plex Mono, the 4px scale, the 8px-max radii and the two-tier elevation) taken from
+  United token set (navy ramp, sand paper, bronze accent, Archivo / Tajawal / IBM Plex
+  Mono, the 4px scale, the 8px-max radii and the two-tier elevation) taken from
   the design-system project on claude.ai/design. Icons are in `app/utils/icons.ts`. Read
   `app/CLAUDE.md` before touching any of it.
 - **The type stack is a substitution.** The design system could not read the webfonts from
-  pioneersunited.com (Next.js font pipeline), so Archivo and IBM Plex Sans Arabic are the
-  closest Google Fonts matches. When the real font files arrive, only the `<link>` in
-  `nuxt.config.ts` and `--font-sans` / `--font-arabic` in `main.css` change.
+  pioneersunited.com (Next.js font pipeline), so Archivo (Latin) and Tajawal (Arabic, per
+  client preference) are the Google Fonts in use. Tajawal has no 600 weight, and unmatched
+  font-matching resolves upward to 700 — a true bold that breaks the system's "600, never
+  700" display rule. `main.css` pins Arabic headings, `.pu-eyebrow`/`.pu-label-caps`, and
+  the `.font-semibold` utility to 500 under `[dir="rtl"]` rather than let that happen; only
+  400/500 are loaded for Tajawal as a result. When the real font files arrive, only the
+  `<link>` in `nuxt.config.ts` and `--font-sans` / `--font-arabic` in `main.css` change.
 - **No photography.** `AppAvatar` renders a navy monogram plate until real portraits are
   supplied; passing a `src` is all that is needed to switch.
 - **Motion is GSAP + ScrollTrigger** (`app/plugins/motion.ts`), kept to entrance reveals

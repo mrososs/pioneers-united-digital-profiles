@@ -35,8 +35,8 @@ export default defineNuxtConfig({
       link: [
         { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
 
-        // Design-system type stack: Archivo (Latin), IBM Plex Sans Arabic
-        // (Arabic), IBM Plex Mono (slugs, URLs, IDs, printed figures).
+        // Design-system type stack: Archivo (Latin), Tajawal (Arabic),
+        // IBM Plex Mono (slugs, URLs, IDs, printed figures).
         // Preconnect first — a public profile is opened from a QR scan on
         // mobile data, where the extra round trip to fonts.gstatic.com is the
         // single most expensive thing on the page.
@@ -44,7 +44,9 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
         {
           rel: 'stylesheet',
-          href: 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap',
+          // Tajawal has no 600 weight; main.css pins headings/labels to 500 under
+          // [dir="rtl"] rather than requesting 700/800, which are unused elsewhere.
+          href: 'https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Tajawal:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap',
         },
       ],
 

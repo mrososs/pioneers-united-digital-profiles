@@ -34,9 +34,9 @@ const props = withDefaults(defineProps<{
 })
 
 const SIZE_CLASS = {
-  sm: 'h-8',
-  md: 'h-11',
-  lg: 'h-16',
+  sm: 'h-10',
+  md: 'h-14',
+  lg: 'h-20',
 }
 
 const src = computed(() => (props.tone === 'white' ? logoWhiteUrl : logoNavyUrl))
