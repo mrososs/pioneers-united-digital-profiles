@@ -13,13 +13,35 @@
  *   6px radius with 2px item corners and a 212px minimum width. The trigger's
  *   chevron rotates on open — a state change, not decoration — at the control
  *   duration.
+ *
+ * `bare` drops the built-in pill styling and chevron so the `#trigger` slot can
+ * fully own its appearance and fill its container — for a trigger embedded in
+ * a foreign layout, such as a tile in a grid of other controls, where the
+ * default label-plus-chevron pill would not fit. The focus ring survives
+ * `bare` (it has to live on the actual focused `<button>`, not on whatever the
+ * slot renders inside it); `inverse` picks the ring variant for a navy surface.
  */
 const props = withDefaults(defineProps<{
   label: string
   align?: 'start' | 'end'
+  bare?: boolean
+  inverse?: boolean
 }>(), {
   align: 'end',
+  bare: false,
+  inverse: false,
 })
+
+const TRIGGER_CLASS = 'inline-flex h-10.5 items-center gap-2 rounded-sm border border-border-default bg-surface px-3.5 text-sm text-heading'
+  + ' transition-[background-color,border-color] duration-[160ms] ease-standard'
+  + ' hover:border-border-strong hover:bg-surface-hover'
+  + ' focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring'
+
+const bareTriggerClass = computed(() => [
+  'flex h-full w-full rounded-sm',
+  'focus-visible:outline-2 focus-visible:outline-offset-2',
+  props.inverse ? 'focus-visible:outline-ring-inverse' : 'focus-visible:outline-ring',
+])
 
 const open = shallowRef(false)
 const rootRef = useTemplateRef<HTMLElement>('root')
@@ -54,7 +76,7 @@ onBeforeUnmount(() => {
 <template>
   <div
     ref="root"
-    class="relative inline-block"
+    :class="bare ? 'relative block h-full w-full' : 'relative inline-block'"
     @keydown="onKeydown"
   >
     <button
@@ -63,10 +85,7 @@ onBeforeUnmount(() => {
       :aria-expanded="open"
       :aria-controls="menuId"
       aria-haspopup="menu"
-      class="inline-flex h-10.5 items-center gap-2 rounded-sm border border-border-default bg-surface px-3.5 text-sm text-heading
-             transition-[background-color,border-color] duration-[160ms] ease-standard
-             hover:border-border-strong hover:bg-surface-hover
-             focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      :class="bare ? bareTriggerClass : TRIGGER_CLASS"
       @click="open = !open"
     >
       <slot name="trigger">
@@ -74,6 +93,7 @@ onBeforeUnmount(() => {
       </slot>
 
       <AppIcon
+        v-if="!bare"
         name="chevron-down"
         :size="16"
         class="text-muted-fg transition-transform duration-[160ms] ease-standard"

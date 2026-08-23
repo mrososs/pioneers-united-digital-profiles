@@ -10,6 +10,12 @@ import { useProfileLinks } from '~/composables/useProfileLinks'
  * "Call" on a profile with no phone number is noise, and on a five-across row it
  * also wastes a fifth of the width the remaining tiles could use.
  *
+ * The share tile is not in this list: it opens a menu (share the link, or get
+ * a PDF) rather than acting directly, so it needs `AppDropdown`'s outside-click
+ * and focus-return behaviour that the plain `<a>`/`<button>` tiles below don't.
+ * `ProfileShareTile` renders with the same tile look and takes the last grid
+ * cell so the row still reads as one set of five.
+ *
  * DESIGN SYSTEM
  *   A 64px-minimum stacked tile: glyph over a 11px label, hairline border, 4px
  *   radius. On the navy hero the tiles switch to the fixed transparency steps
@@ -32,8 +38,7 @@ const props = withDefaults(defineProps<{
 })
 
 const { t } = useI18n()
-const { telHref, mailtoHref, whatsappHref, shareUrl } = useProfileLinks(() => props.profile)
-const { copy, copied } = useClipboard()
+const { telHref, mailtoHref, whatsappHref } = useProfileLinks(() => props.profile)
 
 interface Tile {
   key: string
@@ -41,7 +46,6 @@ interface Tile {
   label: string
   href?: string
   external?: boolean
-  action?: () => void
 }
 
 const tiles = computed<Tile[]>(() => {
@@ -75,15 +79,6 @@ const tiles = computed<Tile[]>(() => {
     })
   }
 
-  if (shareUrl.value) {
-    items.push({
-      key: 'share',
-      icon: copied.value ? 'check' : 'share-2',
-      label: copied.value ? t('common.actions.copied') : t('profile.actions.share'),
-      action: () => void copy(shareUrl.value as string),
-    })
-  }
-
   return items
 })
 
@@ -103,10 +98,8 @@ const labelClass = computed(() => [
 </script>
 
 <template>
-  <div
-    v-if="tiles.length > 0"
-    class="grid grid-flow-col auto-cols-fr gap-2"
-  >
+  <!-- Always at least one cell: the share tile's link is always present. -->
+  <div class="grid grid-flow-col auto-cols-fr gap-2">
     <component
       :is="tile.href ? 'a' : 'button'"
       v-for="tile in tiles"
@@ -116,7 +109,6 @@ const labelClass = computed(() => [
       :target="tile.external ? '_blank' : undefined"
       :rel="tile.external ? 'noopener noreferrer' : undefined"
       :class="tileClass"
-      @click="tile.action?.()"
     >
       <AppIcon
         :name="tile.icon"
@@ -124,5 +116,10 @@ const labelClass = computed(() => [
       />
       <span :class="labelClass">{{ tile.label }}</span>
     </component>
+
+    <ProfileShareTile
+      :profile="profile"
+      :inverse="inverse"
+    />
   </div>
 </template>

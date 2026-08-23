@@ -77,6 +77,8 @@
     },
     "actions": {
       "share": "مشاركة الملف",
+      "shareLink": "مشاركة الرابط",
+      "sharePdf": "مشاركة كملف PDF",
       "saveContact": "حفظ جهة الاتصال",
       "saveContactHint": "يتم تنزيل ملف vCard بصيغة ‎.vcf‎ لإضافته إلى دفتر العناوين",
       "call": "اتصال",
@@ -214,7 +216,8 @@
         "linkEnabled": "ظاهر"
       },
       "addLink": "إضافة رابط",
-      "removeLink": "إزالة الرابط"
+      "removeLink": "إزالة الرابط",
+      "photoCreateHint": "احفظ الملف أولًا، ثم عد إلى هنا لإضافة صورة."
     },
     "profileType": {
       "individual": "شخصي",

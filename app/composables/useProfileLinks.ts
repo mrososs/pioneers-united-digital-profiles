@@ -23,6 +23,10 @@ export function useProfileLinks(profile: MaybeRefOrGetter<PublicProfile | null |
     slug.value ? `/api/profiles/${slug.value}/vcard?locale=${currentLocale.value}` : null,
   )
 
+  const pdfUrl = computed(() =>
+    slug.value ? `/api/profiles/${slug.value}/pdf?locale=${currentLocale.value}` : null,
+  )
+
   const qrSvgUrl = computed(() =>
     slug.value ? `/api/profiles/${slug.value}/qr?format=svg&locale=${currentLocale.value}` : null,
   )
@@ -61,6 +65,7 @@ export function useProfileLinks(profile: MaybeRefOrGetter<PublicProfile | null |
   return {
     shareUrl,
     vcardUrl,
+    pdfUrl,
     qrSvgUrl,
     qrPngDownloadUrl,
     qrSvgDownloadUrl,

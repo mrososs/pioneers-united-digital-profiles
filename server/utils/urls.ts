@@ -38,6 +38,21 @@ export function vcardUrl(slug: string): string {
   return `${siteOrigin()}/api/profiles/${slug}/vcard`
 }
 
+/**
+ * The print-only page a headless browser renders to produce the PDF. Not a
+ * page a visitor is directed to — see server/services/pdf/pdf.service.ts.
+ *
+ * Lives at `/{locale}/print/{slug}` (app/pages/print/[slug].vue) rather than
+ * `/{locale}/{slug}/print`: a `pages/[slug]/print.vue` file next to
+ * `pages/[slug].vue` is Nuxt's convention for a CHILD route of `[slug].vue`,
+ * which has no `<NuxtPage />` outlet — the child would silently never render
+ * and the interactive page would render in its place. `print` as a leading
+ * static segment sidesteps that convention entirely.
+ */
+export function profilePrintUrl(locale: LocaleCode, slug: string): string {
+  return `${siteOrigin()}/${locale}/print/${slug}`
+}
+
 export function qrUrl(slug: string, format: 'svg' | 'png' = 'svg'): string {
   return `${siteOrigin()}/api/profiles/${slug}/qr.${format}`
 }
