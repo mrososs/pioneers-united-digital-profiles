@@ -75,6 +75,7 @@ useSeoMeta({
       :field-errors="fieldErrors"
       :submit-label="t('common.actions.saveChanges')"
       @submit="execute"
+      @photo-updated="refresh"
     >
       <template #secondary-actions>
         <AppButton
