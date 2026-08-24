@@ -53,6 +53,14 @@ const { execute: save, pending, errorMessage, fieldErrors } = useAsyncAction(asy
   saved.value = true
 })
 
+const { scrollToTop } = useScrollToTop()
+
+/** Scroll up after the request settles so the success or error alert above the form is visible. */
+async function onSubmit() {
+  await save()
+  scrollToTop()
+}
+
 useSeoMeta({
   title: () => t('admin.settings.company.title'),
   robots: 'noindex, nofollow',
@@ -90,7 +98,7 @@ useSeoMeta({
     <form
       class="flex flex-col gap-6"
       novalidate
-      @submit.prevent="save()"
+      @submit.prevent="onSubmit"
     >
       <div class="grid gap-4 sm:grid-cols-2">
         <AppFormField

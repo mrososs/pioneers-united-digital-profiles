@@ -107,7 +107,7 @@ useSeoMeta({
 
       <AppButton
         v-if="isPublished"
-        :href="publicPath"
+        :to="publicPath"
         variant="ghost"
         size="sm"
       >

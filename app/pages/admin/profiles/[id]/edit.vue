@@ -28,6 +28,7 @@ if (!profile.value) {
 }
 
 const saved = shallowRef(false)
+const { scrollToTop } = useScrollToTop()
 
 const { execute, pending, errorMessage, fieldErrors } = useAsyncAction(
   async (payload: Record<string, unknown>) => {
@@ -45,6 +46,12 @@ const { execute, pending, errorMessage, fieldErrors } = useAsyncAction(
     return updated
   },
 )
+
+/** Scroll up after the request settles so the success or error alert above the form is visible. */
+async function onSubmit(payload: Record<string, unknown>) {
+  await execute(payload)
+  scrollToTop()
+}
 
 useSeoMeta({
   title: () => t('admin.profiles.editTitle'),
@@ -74,7 +81,7 @@ useSeoMeta({
       :error-message="errorMessage"
       :field-errors="fieldErrors"
       :submit-label="t('common.actions.saveChanges')"
-      @submit="execute"
+      @submit="onSubmit"
       @photo-updated="refresh"
     >
       <template #secondary-actions>

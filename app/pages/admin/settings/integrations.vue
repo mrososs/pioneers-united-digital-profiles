@@ -80,6 +80,14 @@ const { execute: save, pending, errorMessage } = useAsyncAction(async () => {
   saved.value = true
 })
 
+const { scrollToTop } = useScrollToTop()
+
+/** Scroll up after the request settles so the success or error alert above the list is visible. */
+async function onSubmit() {
+  await save()
+  scrollToTop()
+}
+
 useSeoMeta({
   title: () => t('admin.settings.integrations.title'),
   robots: 'noindex, nofollow',
@@ -159,7 +167,7 @@ useSeoMeta({
     <div v-if="canEdit">
       <AppButton
         :loading="pending"
-        @click="save()"
+        @click="onSubmit"
       >
         {{ t('common.actions.saveChanges') }}
       </AppButton>

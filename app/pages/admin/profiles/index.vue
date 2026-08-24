@@ -165,7 +165,7 @@ useSeoMeta({
 
             <AppButton
               v-if="row.status === 'published'"
-              :href="localePath(`/${row.slug}`)"
+              :to="localePath(`/${row.slug}`)"
               variant="ghost"
               size="sm"
             >

@@ -22,6 +22,12 @@ import type { PublicProfile } from '#shared/types/profile'
  * The circle motif bleeding off the trailing top corner is `.pu-hero-motif` —
  * the system's one piece of architectural decoration, an outline at the 0.06
  * transparency step.
+ *
+ * The motif's clipping lives on its own layer (`aria-hidden`, absolutely
+ * positioned, `-z-10`) rather than on this `<section>`. `overflow-hidden` on
+ * the section itself would also clip the share tile's dropdown menu in
+ * `ProfileContactTiles`, which opens below the tile and overflows the
+ * section's flow-content box.
  */
 defineProps<{
   profile: PublicProfile
@@ -29,7 +35,12 @@ defineProps<{
 </script>
 
 <template>
-  <section class="pu-hero-motif relative overflow-hidden bg-surface-inverse">
+  <section class="relative isolate bg-surface-inverse">
+    <div
+      aria-hidden="true"
+      class="pu-hero-motif pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+    />
+
     <div class="mx-auto flex w-full max-w-profile flex-col gap-7 px-5 pt-5 pb-8 lg:max-w-profile-wide lg:px-10 lg:pt-7 lg:pb-11">
       <div class="flex items-center justify-between gap-4">
         <BrandLogo
