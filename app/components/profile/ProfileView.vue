@@ -53,7 +53,11 @@ const isCompany = computed(() => props.profile.profileType === 'company')
     <ProfileHero :profile="profile" />
 
     <div class="mx-auto w-full max-w-profile px-5 py-8 lg:max-w-profile-wide lg:px-10 lg:py-12">
-      <div class="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-x-10">
+      <!-- `grid-cols-1` gives the mobile track an explicit `minmax(0, 1fr)` width. Without
+           it, the single implicit column falls back to `min-width: auto`, which sizes the
+           track to its widest child's unwrapped content — a long company tagline or bio
+           line then blows the whole page out past the viewport width instead of wrapping. -->
+      <div class="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-x-10">
         <div
           v-reveal
           class="lg:col-start-1 lg:row-start-1"
