@@ -12,19 +12,28 @@ import type { Profile } from '#shared/types/profile'
  *   depends on. The extra-links editor has a working server endpoint (`links` on the
  *   profile payload) but no UI yet.
  *
+ * PUBLIC LINK
+ *   The slug is generated server-side from the English name plus a random suffix (see
+ *   `createProfile` in profile.service.ts) and is never typed by an administrator — it is
+ *   printed on business cards and encoded in QR codes, so removing the manual field also
+ *   removes the chance of a typo becoming permanent. The assigned link is shown read-only
+ *   on the profile detail page once the row exists.
+ *
  * PHOTO
- *   Upload requires a profile id (the object key is `profiles/<id>/photo-*`), so it is
- *   only available in edit mode — a profile must exist before it can carry a photo. It
- *   uploads and PATCHes `photoPath` immediately on selection rather than waiting for the
- *   form's own submit, since the file is already durably stored the moment the upload
- *   endpoint returns; leaving it stranded until "Save changes" would just be a second
- *   place the save could be forgotten.
+ *   In edit mode, upload requires a profile id (the object key is `profiles/<id>/photo-*`)
+ *   and PATCHes `photoPath` immediately on selection rather than waiting for the form's own
+ *   submit, since the file is already durably stored the moment the upload endpoint returns.
+ *   In create mode there is no id yet, so the file is only staged here (validated and held
+ *   as a local preview) and the page uploads it right after the new row is inserted — see
+ *   `pages/admin/profiles/new.vue`.
  *
  * VALIDATION
  *   Client-side errors come from the server response, keyed by field path, and are
  *   rendered inline by AppFormField. The form does not pre-validate with Zod on every
  *   keystroke: the server is the authority, its schema is the same one, and duplicating
- *   the pass here would create two places for the rules to drift.
+ *   the pass here would create two places for the rules to drift. When a submit comes back
+ *   with field errors the form scrolls to and focuses the first invalid control, since a
+ *   banner at the top of a long form does not by itself say which field to fix.
  *
  * PAIRED LANGUAGE FIELDS
  *   English and Arabic sit side by side rather than behind tabs, so an editor can see that
@@ -42,17 +51,16 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  submit: [payload: Record<string, unknown>]
+  'submit': [payload: Record<string, unknown>]
   /** The photo changed independently of the form's own submit — see PHOTO above. */
   'photo-updated': []
 }>()
 
 const { t } = useI18n()
-const { upload } = useMediaUpload()
+const { uploadProfilePhoto } = useProfilePhotoUpload()
 
 /** Local draft. Seeded from the profile when editing, empty when creating. */
 const form = reactive({
-  slug: props.profile?.slug ?? '',
   profileType: props.profile?.profileType ?? 'individual',
   status: props.profile?.status ?? 'draft',
   nameEn: props.profile?.nameEn ?? '',
@@ -80,11 +88,6 @@ watch(() => props.profile?.photoUrl, (value) => {
 
 const fileInput = useTemplateRef<HTMLInputElement>('fileInput')
 
-/** Mimics `ApiErrorPayload` so `useApiError` renders it exactly like a server rejection. */
-function clientValidationError(messageKey: string) {
-  return { data: { code: 'validation_error', messageKey } }
-}
-
 const {
   execute: uploadPhoto,
   pending: photoPending,
@@ -93,17 +96,7 @@ const {
   const profileId = props.profile?.id
   if (!profileId) return
 
-  if (!isAllowedMimeType(STORAGE_BUCKETS.profileMedia, file.type)) {
-    throw clientValidationError('validation.fileType')
-  }
-  if (!isWithinSizeLimit(STORAGE_BUCKETS.profileMedia, file.size)) {
-    throw clientValidationError('validation.fileTooLarge')
-  }
-
-  const uploaded = await upload(file, 'profile-photo', profileId)
-  await $fetch(`/api/admin/profiles/${profileId}`, { method: 'PATCH', body: { photoPath: uploaded.path } })
-
-  localPhotoUrl.value = uploaded.url
+  localPhotoUrl.value = await uploadProfilePhoto(profileId, file)
   emit('photo-updated')
 })
 
@@ -129,6 +122,44 @@ function onPhotoSelected(event: Event) {
   if (file) uploadPhoto(file)
 }
 
+/** Staged file for create mode — see PHOTO above. Validated but not yet uploaded. */
+const photoFile = shallowRef<File | null>(null)
+const photoFilePreviewUrl = shallowRef<string | null>(null)
+const photoFileError = shallowRef<string | null>(null)
+
+function revokePhotoFilePreview() {
+  if (photoFilePreviewUrl.value) URL.revokeObjectURL(photoFilePreviewUrl.value)
+}
+
+function onPhotoFileSelected(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  input.value = ''
+  if (!file) return
+
+  if (!isAllowedMimeType(STORAGE_BUCKETS.profileMedia, file.type)) {
+    photoFileError.value = t('validation.fileType')
+    return
+  }
+  if (!isWithinSizeLimit(STORAGE_BUCKETS.profileMedia, file.size)) {
+    photoFileError.value = t('validation.fileTooLarge')
+    return
+  }
+
+  photoFileError.value = null
+  revokePhotoFilePreview()
+  photoFile.value = file
+  photoFilePreviewUrl.value = URL.createObjectURL(file)
+}
+
+function clearPhotoFile() {
+  revokePhotoFilePreview()
+  photoFile.value = null
+  photoFilePreviewUrl.value = null
+}
+
+onBeforeUnmount(revokePhotoFilePreview)
+
 const typeOptions = computed<SelectOption[]>(() =>
   PROFILE_TYPES.map(value => ({ value, label: t(`admin.profileType.${value}`) })),
 )
@@ -141,18 +172,46 @@ function errorFor(field: string): string | undefined {
   return props.fieldErrors?.[field]
 }
 
+/**
+ * A rejected submit renders each bad field's message inline (via `aria-invalid`,
+ * wired through AppFormField/AppInput), but on a form this long that message can sit
+ * well below the fold. Scrolling to and focusing the first invalid control is what
+ * actually tells the administrator where the problem is, rather than just that one
+ * exists.
+ */
+const formRef = useTemplateRef<HTMLFormElement>('formRef')
+
+watch(() => props.fieldErrors, (errors) => {
+  if (!errors || Object.keys(errors).length === 0) return
+
+  nextTick(() => {
+    const invalidField = formRef.value?.querySelector<HTMLElement>('[aria-invalid="true"]')
+    invalidField?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    invalidField?.focus()
+  })
+})
+
 function onSubmit() {
   // Empty strings are sent as-is: the shared Zod schema normalises them to null, so the
   // "cleared a field" case has exactly one meaning on the server.
-  emit('submit', {
+  const payload: Record<string, unknown> = {
     organizationId: props.organizationId,
     ...form,
-  })
+  }
+
+  // Only meaningful on create — see PHOTO above. The page strips this key before
+  // sending the rest of the payload to the API.
+  if (!props.profile && photoFile.value) {
+    payload.photoFile = photoFile.value
+  }
+
+  emit('submit', payload)
 }
 </script>
 
 <template>
   <form
+    ref="formRef"
     class="flex flex-col gap-8"
     novalidate
     @submit.prevent="onSubmit"
@@ -171,23 +230,6 @@ function onSubmit() {
       </legend>
 
       <div class="grid gap-4 sm:grid-cols-2">
-        <AppFormField
-          v-slot="{ id, describedBy, invalid }"
-          :label="t('admin.profileForm.fields.slug')"
-          :hint="t('admin.profileForm.fields.slugHint')"
-          :error="errorFor('slug')"
-          required
-        >
-          <AppInput
-            :id="id"
-            v-model="form.slug"
-            dir="ltr"
-            :invalid="invalid"
-            :described-by="describedBy"
-            :maxlength="80"
-          />
-        </AppFormField>
-
         <AppFormField
           v-slot="{ id, describedBy, invalid }"
           :label="t('admin.profileForm.fields.status')"
@@ -279,12 +321,58 @@ function onSubmit() {
         </AppAlert>
       </template>
 
-      <p
-        v-else
-        class="text-sm text-muted-fg"
-      >
-        {{ t('admin.profileForm.photoCreateHint') }}
-      </p>
+      <template v-else>
+        <div class="flex items-center gap-4">
+          <AppAvatar
+            :src="photoFilePreviewUrl"
+            :name="form.nameEn || form.nameAr"
+            size="xl"
+          />
+
+          <div class="flex flex-col gap-2">
+            <div class="flex flex-wrap gap-2">
+              <AppButton
+                type="button"
+                variant="secondary"
+                size="sm"
+                @click="fileInput?.click()"
+              >
+                {{ t('common.actions.upload') }}
+              </AppButton>
+
+              <AppButton
+                v-if="photoFile"
+                type="button"
+                variant="ghost"
+                size="sm"
+                @click="clearPhotoFile()"
+              >
+                {{ t('common.actions.remove') }}
+              </AppButton>
+            </div>
+
+            <p class="text-xs text-muted-fg">
+              {{ t('admin.profileForm.fields.photoHint') }}
+            </p>
+          </div>
+
+          <input
+            ref="fileInput"
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/avif"
+            class="sr-only"
+            :aria-label="t('admin.profileForm.fields.photo')"
+            @change="onPhotoFileSelected"
+          >
+        </div>
+
+        <AppAlert
+          v-if="photoFileError"
+          tone="danger"
+        >
+          {{ photoFileError }}
+        </AppAlert>
+      </template>
     </fieldset>
 
     <!-- Identity -------------------------------------------------------- -->

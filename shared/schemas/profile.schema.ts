@@ -92,6 +92,11 @@ const profileWritableFields = {
 
 export const profileCreateSchema = z.object({
   ...profileWritableFields,
+  // The dashboard no longer collects a slug — the server derives one from
+  // `nameEn` plus a random suffix (see createProfile in profile.service.ts) and
+  // guarantees it is unique before the row is written. Left optional, rather
+  // than removed, so a scripted caller may still request a specific slug.
+  slug: slugSchema.optional(),
   // Defaults apply on create only — see the note above.
   profileType: profileTypeSchema.default('individual'),
   status: profileStatusSchema.default('draft'),

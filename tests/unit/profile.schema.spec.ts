@@ -15,6 +15,8 @@ const validProfile = {
   nameAr: 'نموذج تنفيذي',
 }
 
+const { slug: _slug, ...validProfileWithoutSlug } = validProfile
+
 describe('slugSchema', () => {
   it('accepts lowercase kebab-case', () => {
     expect(slugSchema.parse('mohammed-alqahtani')).toBe('mohammed-alqahtani')
@@ -74,6 +76,11 @@ describe('profileCreateSchema', () => {
     expect(result.profileType).toBe('individual')
     expect(result.status).toBe('draft')
     expect(result.links).toEqual([])
+  })
+
+  it('accepts an omitted slug — the server generates one', () => {
+    const result = profileCreateSchema.parse(validProfileWithoutSlug)
+    expect(result.slug).toBeUndefined()
   })
 
   it('requires both language variants of the name', () => {

@@ -109,6 +109,19 @@ function isPostgrestError(value: unknown): value is PostgrestError {
   )
 }
 
+/**
+ * True for a unique-violation on `profiles_slug_key`. Shared with
+ * `createProfile()`, which retries a server-generated slug on exactly this
+ * error rather than surfacing it to the administrator.
+ */
+export function isSlugCollisionError(error: unknown): boolean {
+  return (
+    isPostgrestError(error)
+    && error.code === '23505'
+    && error.message.includes('profiles_slug_key')
+  )
+}
+
 function isH3Error(value: unknown): value is ApiErrorInstance {
   return typeof value === 'object' && value !== null && '__h3_error__' in value
 }
@@ -129,8 +142,7 @@ export function fromPostgrestError(error: unknown, event?: H3Event): ApiErrorIns
   switch (error.code) {
     // Unique violation.
     case '23505': {
-      const isSlugCollision = error.message.includes('profiles_slug_key')
-        || error.message.includes('organizations_slug_key')
+      const isSlugCollision = isSlugCollisionError(error) || error.message.includes('organizations_slug_key')
       return apiError({
         code: 'conflict',
         messageKey: isSlugCollision ? 'validation.slugTaken' : 'errors.conflict',

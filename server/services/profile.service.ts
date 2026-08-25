@@ -1,16 +1,19 @@
 import type { H3Event } from 'h3'
+import { randomBytes } from 'node:crypto'
 import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/server'
 import type { Tables, TablesInsert } from '#shared/types/database.types'
 import type { LocaleCode } from '#shared/constants/locales'
 import { alternateLocale } from '#shared/constants/locales'
+import { isReservedProfileSlug, PROFILE_SLUG_MAX_LENGTH, SLUG_PATTERN } from '#shared/constants/profiles'
 import type { PaginatedResult } from '#shared/types/api'
 import type { Profile, ProfileListItem, PublicProfile } from '#shared/types/profile'
 import type { ProfileCreateInput, ProfileListQuery, ProfileUpdateInput } from '#shared/schemas/profile.schema'
 import type { AdminSession } from '#shared/types/session'
 import * as profilesRepository from '../repositories/profiles.repository'
+import type { Client } from '../repositories/profiles.repository'
 import { toProfile, toProfileListItem, toPublicProfile } from '../repositories/profile.mapper'
 import { assertCanManageOrganization } from '../utils/auth'
-import { apiError, fromPostgrestError, notFound } from '../utils/errors'
+import { apiError, fromPostgrestError, isSlugCollisionError, notFound } from '../utils/errors'
 import { profileUrl } from '../utils/urls'
 
 /**
@@ -191,6 +194,58 @@ export async function getProfileForAdmin(
   return toProfile(row, row.profile_links ?? [])
 }
 
+/**
+ * Reduces a display name to the slug alphabet. Diacritics are stripped rather
+ * than transliterated (an Arabic name in `nameEn` collapses to the random
+ * suffix alone) — nothing here needs to be reversible, only unique and legible
+ * for the common case of a Latin name.
+ */
+/** Combining diacritical marks left behind by `normalize('NFKD')`. */
+const COMBINING_DIACRITICS_PATTERN = /[̀-ͯ]/g
+
+function slugifyName(name: string): string {
+  return name
+    .normalize('NFKD')
+    .replace(COMBINING_DIACRITICS_PATTERN, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+function randomSlugSuffix(): string {
+  return randomBytes(4).toString('hex')
+}
+
+/**
+ * Generates the public link for a new profile: `<name>-<random suffix>`.
+ *
+ * The link is printed on business cards and encoded in QR codes (see "Core
+ * rules" in the root CLAUDE.md), so an administrator no longer types it —
+ * removing that field also removes the chance of a typo becoming permanent.
+ * Uniqueness is checked against the database before the value is returned;
+ * `createProfile` additionally retries on an insert-time collision, closing
+ * the race between this check and the write.
+ */
+async function generateUniqueProfileSlug(event: H3Event, client: Client, nameEn: string): Promise<string> {
+  const base = slugifyName(nameEn).slice(0, PROFILE_SLUG_MAX_LENGTH - 9).replace(/-+$/, '') || 'profile'
+  const maxAttempts = 8
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const candidate = `${base}-${randomSlugSuffix()}`
+
+    if (!SLUG_PATTERN.test(candidate) || isReservedProfileSlug(candidate)) continue
+
+    const existing = await profilesRepository.findProfileBySlug(client, candidate)
+    if (!existing) return candidate
+  }
+
+  throw apiError({
+    code: 'internal_error',
+    event,
+    internal: { reason: 'slug_generation_exhausted', nameEn },
+  })
+}
+
 function toLinkInsert(link: ProfileCreateInput['links'][number], index: number) {
   return {
     type: link.type,
@@ -214,9 +269,15 @@ export async function createProfile(
 
   const client = serverSupabaseServiceRole(event)
 
-  const values: TablesInsert<'profiles'> = {
+  // A slug supplied by a scripted caller is trusted as-is (and a collision on it
+  // surfaces normally, below). One the dashboard generates is retried on collision
+  // instead, since there is no field left in the UI for the administrator to fix.
+  const slugIsGenerated = input.slug === undefined
+  let slug = input.slug ?? await generateUniqueProfileSlug(event, client, input.nameEn)
+
+  const buildValues = (slugValue: string): TablesInsert<'profiles'> => ({
     organization_id: input.organizationId,
-    slug: input.slug,
+    slug: slugValue,
     profile_type: input.profileType,
     status: input.status,
     name_en: input.nameEn,
@@ -238,21 +299,33 @@ export async function createProfile(
     created_by: session.userId,
     updated_by: session.userId,
     // published_at is owned by a database trigger, never set from here.
+  })
+
+  const maxInsertAttempts = slugIsGenerated ? 3 : 1
+
+  for (let attempt = 1; attempt <= maxInsertAttempts; attempt++) {
+    try {
+      const row = await profilesRepository.insertProfile(client, buildValues(slug))
+      const links = await profilesRepository.replaceProfileLinks(
+        client,
+        row.id,
+        input.links.map(toLinkInsert),
+      )
+
+      return toProfile(row, links)
+    }
+    catch (error) {
+      const isLastAttempt = attempt === maxInsertAttempts
+      if (slugIsGenerated && isSlugCollisionError(error) && !isLastAttempt) {
+        slug = await generateUniqueProfileSlug(event, client, input.nameEn)
+        continue
+      }
+      throw fromPostgrestError(error, event)
+    }
   }
 
-  try {
-    const row = await profilesRepository.insertProfile(client, values)
-    const links = await profilesRepository.replaceProfileLinks(
-      client,
-      row.id,
-      input.links.map(toLinkInsert),
-    )
-
-    return toProfile(row, links)
-  }
-  catch (error) {
-    throw fromPostgrestError(error, event)
-  }
+  // Unreachable: the loop above always returns or throws.
+  throw fromPostgrestError(new Error('unreachable'), event)
 }
 
 export async function updateProfileForAdmin(

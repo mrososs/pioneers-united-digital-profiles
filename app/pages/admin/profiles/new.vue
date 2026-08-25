@@ -9,6 +9,14 @@ import type { Profile } from '#shared/types/profile'
  * from the session. Reading it from runtime config or a query parameter would let a client
  * nominate someone else's tenant — the server would reject it, but the UI should not be
  * built to ask.
+ *
+ * PHOTO
+ *   `AdminProfileForm` stages a chosen file locally (there is no profile id yet to derive
+ *   the object key from) and hands it back on submit as `payload.photoFile`. Once the row
+ *   exists here, it is uploaded and PATCHed onto that profile before navigating away. If the
+ *   upload itself fails, the profile has still been created — the page navigates on anyway
+ *   rather than leaving a duplicate-slug retry trap, and flags the failure via a query
+ *   param the edit page surfaces as an alert (see `pages/admin/profiles/[id]/edit.vue`).
  */
 definePageMeta({
   layout: 'admin',
@@ -17,21 +25,43 @@ definePageMeta({
 
 const { t } = useI18n()
 const localePath = useLocalePath()
+const { uploadProfilePhoto } = useProfilePhotoUpload()
+const { scrollToTop } = useScrollToTop()
 
 const { data: organization } = await useFetch<Organization>('/api/admin/organization')
 
 const { execute, pending, errorMessage, fieldErrors } = useAsyncAction(
   async (payload: Record<string, unknown>) => {
+    const { photoFile, ...body } = payload as Record<string, unknown> & { photoFile?: File }
+
     const created = await $fetch<Profile>('/api/admin/profiles', {
       method: 'POST',
-      body: payload,
+      body,
     })
 
-    await navigateTo(localePath(`/admin/profiles/${created.id}`))
+    let photoUploadFailed = false
+    if (photoFile instanceof File) {
+      try {
+        await uploadProfilePhoto(created.id, photoFile)
+      }
+      catch {
+        photoUploadFailed = true
+      }
+    }
+
+    await navigateTo({
+      path: localePath(`/admin/profiles/${created.id}`),
+      query: photoUploadFailed ? { photoError: '1' } : undefined,
+    })
 
     return created
   },
 )
+
+async function onSubmit(payload: Record<string, unknown>) {
+  await execute(payload)
+  scrollToTop()
+}
 
 useSeoMeta({
   title: () => t('admin.profiles.newTitle'),
@@ -50,7 +80,7 @@ useSeoMeta({
       :error-message="errorMessage"
       :field-errors="fieldErrors"
       :submit-label="t('common.actions.create')"
-      @submit="execute"
+      @submit="onSubmit"
     >
       <template #secondary-actions>
         <AppButton

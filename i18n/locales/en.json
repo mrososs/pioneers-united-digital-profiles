@@ -188,7 +188,6 @@
       },
       "fields": {
         "slug": "Public link",
-        "slugHint": "Lowercase letters, numbers and hyphens. Used in the public URL.",
         "profileType": "Profile type",
         "status": "Status",
         "nameEn": "Full name (English)",
@@ -217,7 +216,7 @@
       },
       "addLink": "Add link",
       "removeLink": "Remove link",
-      "photoCreateHint": "Save the profile first, then come back here to add a photo."
+      "photoUploadFailedAfterCreate": "The profile was created, but the photo could not be uploaded. Choose it again below."
     },
     "profileType": {
       "individual": "Individual",

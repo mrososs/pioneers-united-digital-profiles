@@ -16,6 +16,7 @@ definePageMeta({
 const { t } = useI18n()
 const localePath = useLocalePath()
 const route = useRoute()
+const router = useRouter()
 
 const profileId = computed(() => String(route.params.id ?? ''))
 
@@ -29,6 +30,20 @@ if (!profile.value) {
 
 const saved = shallowRef(false)
 const { scrollToTop } = useScrollToTop()
+
+/**
+ * The create page lands here right after inserting the profile row. If the photo the
+ * administrator staged there failed to upload, it flags that with `?photoError=1` instead
+ * of blocking navigation — see PHOTO in `pages/admin/profiles/new.vue`. Surfaced once, then
+ * scrubbed from the URL so a reload does not repeat it.
+ */
+const photoUploadFailedOnCreate = shallowRef(route.query.photoError === '1')
+
+onMounted(() => {
+  if (!photoUploadFailedOnCreate.value) return
+  const { photoError: _photoError, ...query } = route.query
+  router.replace({ query })
+})
 
 const { execute, pending, errorMessage, fieldErrors } = useAsyncAction(
   async (payload: Record<string, unknown>) => {
@@ -65,6 +80,13 @@ useSeoMeta({
       :title="t('admin.profiles.editTitle')"
       :description="profile?.slug"
     />
+
+    <AppAlert
+      v-if="photoUploadFailedOnCreate"
+      tone="danger"
+    >
+      {{ t('admin.profileForm.photoUploadFailedAfterCreate') }}
+    </AppAlert>
 
     <AppAlert
       v-if="saved && !errorMessage"
