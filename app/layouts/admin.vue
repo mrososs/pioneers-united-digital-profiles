@@ -62,7 +62,7 @@ async function signOut() {
         >
           <BrandLogo
             tone="white"
-            size="sm"
+            size="md"
           />
           <span class="flex flex-col">
             <span class="pu-eyebrow text-3xs text-surface-inverse-fg">{{ t('app.shortName') }}</span>
