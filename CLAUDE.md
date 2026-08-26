@@ -374,6 +374,22 @@ Accurate as of the bootstrap. Update this section as things change.
 - **The photo uploader and link editor have no UI.** The server endpoints
   (`/api/admin/media/upload`, `links` on the profile payload) are complete and enforced;
   the dashboard controls are the natural first addition.
+- **Profile sections are implemented end to end, except in the dashboard.** A profile now
+  carries structured content blocks — `metrics`, `expertise`, `services`, `experience`,
+  `credentials`, `recognition`, `languages`, `offices`, `documents` — plus a `headline`
+  positioning line and a `booking_url`. The full read and write path exists: the
+  `profile_sections` table with RLS, the Zod payload union in
+  `shared/schemas/profile-section.schema.ts`, the tolerant read mapper, and nine renderer
+  components composed by `ProfileSectionList`.
+
+  **The admin editor for them does not.** `sections` is accepted on the profile
+  create/update payload and enforced, but there is no dashboard form, so blocks can only
+  be written by a script today (`scripts/seed-demo-profiles.mjs`). That editor is the next
+  piece of work, and it is the same gap as the photo uploader above — the bottleneck is
+  the editing experience, not the public page.
+
+  Adding a tenth block type is a schema variant plus a renderer; do not add a table per
+  block. See the migration header in `20260826000100_profile_sections.sql` for why.
 - **The design system has landed.** `app/assets/css/main.css` now carries the Pioneers
   United token set (navy ramp, sand paper, bronze accent, Archivo / Tajawal / IBM Plex
   Mono, the 4px scale, the 8px-max radii and the two-tier elevation) taken from
