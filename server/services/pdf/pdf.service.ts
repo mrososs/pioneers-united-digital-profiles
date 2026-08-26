@@ -107,24 +107,53 @@ export interface ProfilePdfInput {
 }
 
 /**
- * The A4 print page waits on its own images (photo, QR) via the browser's
- * native `networkidle0` signal, and on web fonts via `document.fonts.ready` —
- * both matter for Arabic, whose glyphs live in Tajawal and would render as
- * tofu if the page were printed before the font finished loading.
+ * PAGE GEOMETRY
+ *
+ * Chromium scales the 900px-wide viewport onto A4's 210mm width, so one CSS
+ * pixel is 210/900 = 0.2333mm. The viewport height is then chosen so that
+ * `100vh` in the print view is exactly one printable page:
+ *
+ *   printable height = 297mm − 14mm top − 14mm bottom = 269mm
+ *   269mm ÷ 0.2333mm/px                               = 1153px
+ *
+ * WHY THE MARGINS MOVED OUT OF THE PAGE
+ *   They used to be zero, with the print view supplying `py-16` instead. That is
+ *   correct only while the PDF is one page: vertical padding applies at the start
+ *   and end of a box, not to each page fragment, so as soon as a profile carries
+ *   enough content to spill onto a second page the text ran straight to the paper
+ *   edge. Real page margins apply to every sheet. Horizontal spacing stays on the
+ *   container, where box padding *does* repeat per fragment.
+ *
+ * The page waits on its own images (photo, QR) via the browser's native
+ * `networkidle0` signal, and on web fonts via `document.fonts.ready` — both
+ * matter for Arabic, whose glyphs live in Tajawal and would render as tofu if the
+ * page were printed before the font finished loading.
  */
+const PAGE_MARGIN_MM = 14
+const VIEWPORT_WIDTH_PX = 900
+/** (297 − 2 × 14)mm ÷ (210mm ÷ 900px), rounded — see the note above. */
+const VIEWPORT_HEIGHT_PX = Math.round(
+  (297 - 2 * PAGE_MARGIN_MM) / (210 / VIEWPORT_WIDTH_PX),
+)
+
 export async function renderProfilePdf({ slug, locale }: ProfilePdfInput): Promise<Buffer> {
   const browser = await getBrowser()
   const page = await browser.newPage()
 
   try {
-    await page.setViewport({ width: 900, height: 1273 })
+    await page.setViewport({ width: VIEWPORT_WIDTH_PX, height: VIEWPORT_HEIGHT_PX })
     await page.goto(profilePrintUrl(locale, slug), { waitUntil: 'networkidle0', timeout: 20_000 })
     await page.evaluate(() => document.fonts.ready)
 
     const bytes = await page.pdf({
       format: 'a4',
       printBackground: true,
-      margin: { top: '0', right: '0', bottom: '0', left: '0' },
+      margin: {
+        top: `${PAGE_MARGIN_MM}mm`,
+        right: '0',
+        bottom: `${PAGE_MARGIN_MM}mm`,
+        left: '0',
+      },
     })
 
     return Buffer.from(bytes)

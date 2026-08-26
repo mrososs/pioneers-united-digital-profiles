@@ -58,7 +58,12 @@ const contactRows = computed<ContactRow[]>(() => {
 </script>
 
 <template>
-  <div class="mx-auto flex min-h-screen w-full max-w-[800px] flex-col gap-10 px-16 py-16">
+  <!-- Horizontal padding only. Vertical spacing is the PDF's page margin, so it
+       repeats on every sheet — box padding would apply to the first and last page
+       and let a second page run to the paper edge. See pdf.service.ts.
+       `min-h-screen` is one printable page exactly (the viewport is sized to it),
+       which is what keeps the QR footer pinned to the bottom of a short profile. -->
+  <div class="mx-auto flex min-h-screen w-full max-w-[800px] flex-col gap-10 px-16">
     <header class="flex flex-col items-center gap-4 text-center">
       <AppAvatar
         :src="profile.photoUrl"
@@ -98,14 +103,24 @@ const contactRows = computed<ContactRow[]>(() => {
           />
           {{ profile.location }}
         </p>
+
+        <p
+          v-if="profile.headline"
+          class="max-w-[46ch] text-sm leading-relaxed text-balance text-body"
+        >
+          {{ profile.headline }}
+        </p>
       </div>
     </header>
 
+    <!-- No `break-inside-avoid` on the section: a long bio that does not fit in
+         the remainder of a page would be moved whole, blanking most of the sheet.
+         A paragraph splits across a fold perfectly well. -->
     <section
       v-if="profile.bio"
       class="flex flex-col gap-2.5"
     >
-      <h2 class="pu-eyebrow text-muted-fg">
+      <h2 class="pu-eyebrow break-after-avoid text-muted-fg">
         {{ t('profile.sections.about') }}
       </h2>
       <p class="text-base leading-relaxed text-pretty text-body">
@@ -113,11 +128,16 @@ const contactRows = computed<ContactRow[]>(() => {
       </p>
     </section>
 
+    <ProfilePrintSections
+      v-if="profile.sections.length > 0"
+      :sections="profile.sections"
+    />
+
     <section
       v-if="contactRows.length > 0"
       class="flex flex-col gap-2.5"
     >
-      <h2 class="pu-eyebrow text-muted-fg">
+      <h2 class="pu-eyebrow break-after-avoid text-muted-fg">
         {{ t('profile.sections.contact') }}
       </h2>
 
@@ -125,6 +145,7 @@ const contactRows = computed<ContactRow[]>(() => {
         <li
           v-for="row in contactRows"
           :key="row.key"
+          class="break-inside-avoid"
         >
           <a
             :href="row.href"
