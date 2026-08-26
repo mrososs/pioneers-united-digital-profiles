@@ -46,6 +46,16 @@ const props = defineProps<{
 const { t } = useI18n()
 
 const isCompany = computed(() => props.profile.profileType === 'company')
+
+/**
+ * Structured content blocks, split into the summary strip and everything else.
+ *
+ * The metrics band is lifted out of the section flow and placed directly under
+ * the contact action: it is a summary, not a destination, and burying it below
+ * the bio would waste the one block a reader takes in at a glance. See
+ * `useProfileSections` for why it is also excluded from the navigation.
+ */
+const { navItems, metrics, body, showNav } = useProfileSections(() => props.profile.sections)
 </script>
 
 <template>
@@ -85,10 +95,26 @@ const isCompany = computed(() => props.profile.profileType === 'company')
         </aside>
 
         <div class="flex flex-col gap-8 lg:col-start-1 lg:row-start-2">
+          <!-- Summary strip. Above the bio because a reader takes in four
+               figures faster than four sentences. -->
+          <ProfileMetricsBand
+            v-if="metrics && metrics.kind === 'metrics'"
+            v-reveal
+            :items="metrics.items"
+          />
+
+          <!-- Only worth the vertical space once there is enough page to get
+               lost in — see `showNav`. -->
+          <ProfileSectionNav
+            v-if="showNav"
+            :items="navItems"
+          />
+
           <section
             v-if="profile.bio"
+            id="section-about"
             v-reveal
-            class="flex flex-col gap-3"
+            class="flex scroll-mt-20 flex-col gap-3 lg:scroll-mt-24"
           >
             <h2 class="pu-eyebrow text-muted-fg">
               {{ t('profile.sections.about') }}
@@ -97,6 +123,10 @@ const isCompany = computed(() => props.profile.profileType === 'company')
               {{ profile.bio }}
             </p>
           </section>
+
+          <!-- Structured blocks. The component renders nothing for an empty
+               array, so no emptiness guard is needed here. -->
+          <ProfileSectionList :sections="body" />
 
           <!-- The emptiness check is here, not only inside the component: a
                runtime directive needs an element to attach to, and a component

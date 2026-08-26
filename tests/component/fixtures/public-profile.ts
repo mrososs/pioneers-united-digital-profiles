@@ -18,6 +18,7 @@ export function publicProfileFixture(overrides: Partial<PublicProfile> = {}): Pu
     name: 'Sample Executive',
     jobTitle: 'Chief Example Officer',
     department: 'Executive Office',
+    headline: 'Leads a portfolio of logistics and mixed-use development across the Kingdom.',
     bio: 'Leads the commercial development portfolio.',
     location: 'Riyadh, Saudi Arabia',
 
@@ -26,6 +27,7 @@ export function publicProfileFixture(overrides: Partial<PublicProfile> = {}): Pu
     whatsapp: '+966555000001',
     linkedinUrl: 'https://www.linkedin.com/in/sample-executive',
     websiteUrl: 'https://pioneersunited.com',
+    bookingUrl: null,
 
     photoUrl: null,
 
@@ -37,6 +39,12 @@ export function publicProfileFixture(overrides: Partial<PublicProfile> = {}): Pu
         url: 'https://pioneersunited.com',
       },
     ],
+
+    // Empty by default: most of these tests assert on the blocks that are always
+    // present, and a fixture carrying nine content sections would bury them.
+    // Section rendering has its own tests; a case that needs blocks passes them
+    // through `overrides`.
+    sections: [],
 
     organization: {
       slug: 'pioneers-united',

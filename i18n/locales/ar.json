@@ -73,7 +73,19 @@
       "links": "روابط",
       "company": "الشركة",
       "companyBadge": "ملف الشركة",
-      "share": "مشاركة"
+      "share": "مشاركة",
+      "kinds": {
+        "metrics": "أبرز المؤشرات",
+        "expertise": "مجالات الخبرة",
+        "services": "الخدمات",
+        "experience": "المسيرة المهنية",
+        "credentials": "الشهادات والاعتمادات",
+        "recognition": "التكريم والإعلام",
+        "languages": "اللغات",
+        "offices": "المكاتب",
+        "documents": "المستندات"
+      },
+      "navLabel": "أقسام الملف"
     },
     "actions": {
       "share": "مشاركة الملف",
@@ -91,7 +103,8 @@
       "addToGoogleWallet": "أضِف إلى Google Wallet",
       "showQr": "إظهار رمز الاستجابة السريعة",
       "downloadQrPng": "تنزيل PNG",
-      "downloadQrSvg": "تنزيل SVG"
+      "downloadQrSvg": "تنزيل SVG",
+      "bookMeeting": "حجز اجتماع"
     },
     "qr": {
       "title": "امسح الرمز لفتح الملف",

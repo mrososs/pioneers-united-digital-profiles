@@ -73,7 +73,19 @@
       "links": "Links",
       "company": "Company",
       "companyBadge": "Company profile",
-      "share": "Share"
+      "share": "Share",
+      "kinds": {
+        "metrics": "Highlights",
+        "expertise": "Areas of expertise",
+        "services": "Services",
+        "experience": "Experience",
+        "credentials": "Credentials",
+        "recognition": "Recognition",
+        "languages": "Languages",
+        "offices": "Offices",
+        "documents": "Documents"
+      },
+      "navLabel": "Profile sections"
     },
     "actions": {
       "share": "Share",
@@ -91,7 +103,8 @@
       "addToGoogleWallet": "Add to Google Wallet",
       "showQr": "Show QR code",
       "downloadQrPng": "Download PNG",
-      "downloadQrSvg": "Download SVG"
+      "downloadQrSvg": "Download SVG",
+      "bookMeeting": "Book a meeting"
     },
     "qr": {
       "title": "Scan to open this profile",

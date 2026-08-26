@@ -124,6 +124,19 @@ onMounted(() => {
         />
         {{ profile.location }}
       </p>
+
+      <!-- The positioning line. Constrained to ~46 characters per line so it
+           stays two or three lines on a phone: it sits above the contact tiles,
+           and a paragraph here would push the one action the page exists for
+           below the fold. -->
+      <p
+        v-if="profile.headline"
+        data-identity-meta
+        class="mt-1 max-w-[34ch] text-sm leading-relaxed text-balance"
+        :class="inverse ? 'text-on-navy-78' : 'text-body'"
+      >
+        {{ profile.headline }}
+      </p>
     </div>
   </header>
 </template>
