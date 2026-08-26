@@ -1,6 +1,7 @@
 import type { LocaleCode } from '#shared/constants/locales'
 import type { ProfileLinkType, ProfileStatus, ProfileType } from '#shared/constants/profiles'
 import type { OrganizationSummary } from '#shared/types/organization'
+import type { ProfileSection, PublicProfileSection } from '#shared/types/profile-section'
 
 /**
  * Profile DTOs.
@@ -35,6 +36,8 @@ export interface Profile {
   jobTitleAr: string | null
   departmentEn: string | null
   departmentAr: string | null
+  headlineEn: string | null
+  headlineAr: string | null
   bioEn: string | null
   bioAr: string | null
   locationEn: string | null
@@ -45,6 +48,7 @@ export interface Profile {
   whatsapp: string | null
   linkedinUrl: string | null
   websiteUrl: string | null
+  bookingUrl: string | null
 
   photoPath: string | null
   /** Resolved public CDN URL for `photoPath`, or null when there is no photo. */
@@ -57,6 +61,7 @@ export interface Profile {
   updatedAt: string
 
   links: ProfileLink[]
+  sections: ProfileSection[]
 }
 
 /** Row shape for the admin profiles table — deliberately narrow. */
@@ -86,6 +91,8 @@ export interface PublicProfile {
   name: string
   jobTitle: string | null
   department: string | null
+  /** One-sentence positioning line, rendered between the role and the bio. */
+  headline: string | null
   bio: string | null
   location: string | null
 
@@ -94,10 +101,13 @@ export interface PublicProfile {
   whatsapp: string | null
   linkedinUrl: string | null
   websiteUrl: string | null
+  bookingUrl: string | null
 
   photoUrl: string | null
 
   links: PublicProfileLink[]
+  /** Structured content blocks, ordered, already resolved for `locale`. */
+  sections: PublicProfileSection[]
   organization: OrganizationSummary
 
   /** Canonical absolute URL of this profile in this locale. */

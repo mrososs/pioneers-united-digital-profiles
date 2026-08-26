@@ -30,18 +30,21 @@ import { profileUrl } from '../utils/urls'
 
 type ProfileRow = Tables<'profiles'>
 type ProfileLinkRow = Tables<'profile_links'>
+type ProfileSectionRow = Tables<'profile_sections'>
 type OrganizationRow = Tables<'organizations'>
 
 /** Shape of the joined row PostgREST returns for the public query. */
 interface JoinedPublicProfileRow extends ProfileRow {
   organizations: OrganizationRow | null
   profile_links: ProfileLinkRow[] | null
+  profile_sections: ProfileSectionRow[] | null
 }
 
 /** The same row after the join has been proven present. */
 interface PublishedProfileRow extends ProfileRow {
   organization: OrganizationRow
   links: ProfileLinkRow[]
+  sections: ProfileSectionRow[]
 }
 
 /**
@@ -67,7 +70,12 @@ async function fetchPublishedRow(event: H3Event, slug: string): Promise<Publishe
   // Reporting "exists but unpublished" would leak the roster of upcoming profiles.
   if (!row || !row.organizations) throw notFound(event)
 
-  return { ...row, organization: row.organizations, links: row.profile_links ?? [] }
+  return {
+    ...row,
+    organization: row.organizations,
+    links: row.profile_links ?? [],
+    sections: row.profile_sections ?? [],
+  }
 }
 
 export async function getPublicProfile(
@@ -77,7 +85,7 @@ export async function getPublicProfile(
 ): Promise<PublicProfile> {
   const row = await fetchPublishedRow(event, slug)
 
-  return toPublicProfile(row, row.organization, row.links, locale)
+  return toPublicProfile(row, row.organization, row.links, locale, row.sections)
 }
 
 /** The data a vCard needs, resolved for one locale. */
@@ -178,10 +186,14 @@ export async function getProfileForAdmin(
 ): Promise<Profile> {
   const client = serverSupabaseServiceRole(event)
 
-  let row: (ProfileRow & { profile_links: ProfileLinkRow[] | null }) | null
+  type JoinedAdminRow = ProfileRow & {
+    profile_links: ProfileLinkRow[] | null
+    profile_sections: ProfileSectionRow[] | null
+  }
+
+  let row: JoinedAdminRow | null
   try {
-    row = (await profilesRepository.findProfileById(client, id)) as
-      (ProfileRow & { profile_links: ProfileLinkRow[] | null }) | null
+    row = (await profilesRepository.findProfileById(client, id)) as JoinedAdminRow | null
   }
   catch (error) {
     throw fromPostgrestError(error, event)
@@ -191,7 +203,7 @@ export async function getProfileForAdmin(
 
   assertCanManageOrganization(event, session, row.organization_id)
 
-  return toProfile(row, row.profile_links ?? [])
+  return toProfile(row, row.profile_links ?? [], row.profile_sections ?? [])
 }
 
 /**
@@ -259,6 +271,26 @@ function toLinkInsert(link: ProfileCreateInput['links'][number], index: number) 
   }
 }
 
+/**
+ * Section rows to insert. Same reasoning as links: the submitted array order is
+ * the operator's intent, so it becomes `sort_order` rather than trusting a
+ * client-supplied index.
+ *
+ * `payload` has already been through the discriminated union in
+ * profile-section.schema.ts by the time it arrives, so what is written here is
+ * known to match its kind.
+ */
+function toSectionInsert(section: ProfileCreateInput['sections'][number], index: number) {
+  return {
+    kind: section.kind,
+    title_en: section.titleEn,
+    title_ar: section.titleAr,
+    payload: section.payload as TablesInsert<'profile_sections'>['payload'],
+    sort_order: index,
+    enabled: section.enabled,
+  }
+}
+
 export async function createProfile(
   event: H3Event,
   session: AdminSession,
@@ -286,6 +318,8 @@ export async function createProfile(
     job_title_ar: input.jobTitleAr,
     department_en: input.departmentEn,
     department_ar: input.departmentAr,
+    headline_en: input.headlineEn,
+    headline_ar: input.headlineAr,
     bio_en: input.bioEn,
     bio_ar: input.bioAr,
     location_en: input.locationEn,
@@ -295,6 +329,7 @@ export async function createProfile(
     whatsapp: input.whatsapp,
     linkedin_url: input.linkedinUrl,
     website_url: input.websiteUrl,
+    booking_url: input.bookingUrl,
     photo_path: input.photoPath,
     created_by: session.userId,
     updated_by: session.userId,
@@ -311,8 +346,13 @@ export async function createProfile(
         row.id,
         input.links.map(toLinkInsert),
       )
+      const sections = await profilesRepository.replaceProfileSections(
+        client,
+        row.id,
+        input.sections.map(toSectionInsert),
+      )
 
-      return toProfile(row, links)
+      return toProfile(row, links, sections)
     }
     catch (error) {
       const isLastAttempt = attempt === maxInsertAttempts
@@ -354,6 +394,8 @@ export async function updateProfileForAdmin(
   assign('job_title_ar', input.jobTitleAr)
   assign('department_en', input.departmentEn)
   assign('department_ar', input.departmentAr)
+  assign('headline_en', input.headlineEn)
+  assign('headline_ar', input.headlineAr)
   assign('bio_en', input.bioEn)
   assign('bio_ar', input.bioAr)
   assign('location_en', input.locationEn)
@@ -363,17 +405,24 @@ export async function updateProfileForAdmin(
   assign('whatsapp', input.whatsapp)
   assign('linkedin_url', input.linkedinUrl)
   assign('website_url', input.websiteUrl)
+  assign('booking_url', input.bookingUrl)
   assign('photo_path', input.photoPath)
 
   try {
     const row = await profilesRepository.updateProfile(client, id, values)
     if (!row) throw notFound(event)
 
+    // An absent key means "leave alone", not "clear" — the dashboard PATCHes one
+    // panel at a time, and a status toggle must not wipe a profile's content.
     const links = input.links
       ? await profilesRepository.replaceProfileLinks(client, id, input.links.map(toLinkInsert))
       : await profilesRepository.listProfileLinks(client, id)
 
-    return toProfile(row, links)
+    const sections = input.sections
+      ? await profilesRepository.replaceProfileSections(client, id, input.sections.map(toSectionInsert))
+      : await profilesRepository.listProfileSections(client, id)
+
+    return toProfile(row, links, sections)
   }
   catch (error) {
     throw fromPostgrestError(error, event)

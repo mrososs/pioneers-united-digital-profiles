@@ -1,5 +1,7 @@
 import { z } from 'zod'
 import { PROFILE_LINK_TYPES, PROFILE_STATUSES, PROFILE_TYPES } from '#shared/constants/profiles'
+import { PROFILE_SECTION_KINDS } from '#shared/constants/profile-sections'
+import { profileSectionInputSchema } from '#shared/schemas/profile-section.schema'
 import {
   optionalEmailSchema,
   optionalPhoneSchema,
@@ -74,6 +76,11 @@ const profileWritableFields = {
   departmentEn: optionalText(160),
   departmentAr: optionalText(160),
 
+  // The positioning line. Deliberately short: it sits in the hero, above the bio,
+  // and its whole job is to be readable at a glance on a phone.
+  headlineEn: optionalText(240),
+  headlineAr: optionalText(240),
+
   bioEn: optionalText(2000),
   bioAr: optionalText(2000),
 
@@ -83,6 +90,7 @@ const profileWritableFields = {
 
   linkedinUrl: optionalSafeUrlSchema,
   websiteUrl: optionalSafeUrlSchema,
+  bookingUrl: optionalSafeUrlSchema,
 
   locationEn: optionalText(200),
   locationAr: optionalText(200),
@@ -101,6 +109,9 @@ export const profileCreateSchema = z.object({
   profileType: profileTypeSchema.default('individual'),
   status: profileStatusSchema.default('draft'),
   links: z.array(profileLinkInputSchema).max(20).default([]),
+  // One block per kind is enforced by a unique index; the ceiling here is simply
+  // the number of kinds that exist, so a malformed payload cannot fan out.
+  sections: z.array(profileSectionInputSchema).max(PROFILE_SECTION_KINDS.length).default([]),
 })
 
 /**
@@ -112,6 +123,7 @@ export const profileUpdateSchema = z
   .object({
     ...profileWritableFields,
     links: z.array(profileLinkInputSchema).max(20),
+    sections: z.array(profileSectionInputSchema).max(PROFILE_SECTION_KINDS.length),
   })
   .omit({ organizationId: true })
   .partial()

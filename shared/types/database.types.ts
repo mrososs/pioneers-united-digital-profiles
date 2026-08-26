@@ -244,15 +244,65 @@ export type Database = {
           },
         ]
       }
+      profile_sections: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          kind: Database["public"]["Enums"]["profile_section_kind"]
+          payload: Json
+          profile_id: string
+          sort_order: number
+          title_ar: string | null
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind: Database["public"]["Enums"]["profile_section_kind"]
+          payload?: Json
+          profile_id: string
+          sort_order?: number
+          title_ar?: string | null
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          kind?: Database["public"]["Enums"]["profile_section_kind"]
+          payload?: Json
+          profile_id?: string
+          sort_order?: number
+          title_ar?: string | null
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_sections_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           bio_ar: string | null
           bio_en: string | null
+          booking_url: string | null
           created_at: string
           created_by: string | null
           department_ar: string | null
           department_en: string | null
           email: string | null
+          headline_ar: string | null
+          headline_en: string | null
           id: string
           job_title_ar: string | null
           job_title_en: string | null
@@ -276,11 +326,14 @@ export type Database = {
         Insert: {
           bio_ar?: string | null
           bio_en?: string | null
+          booking_url?: string | null
           created_at?: string
           created_by?: string | null
           department_ar?: string | null
           department_en?: string | null
           email?: string | null
+          headline_ar?: string | null
+          headline_en?: string | null
           id?: string
           job_title_ar?: string | null
           job_title_en?: string | null
@@ -304,11 +357,14 @@ export type Database = {
         Update: {
           bio_ar?: string | null
           bio_en?: string | null
+          booking_url?: string | null
           created_at?: string
           created_by?: string | null
           department_ar?: string | null
           department_en?: string | null
           email?: string | null
+          headline_ar?: string | null
+          headline_en?: string | null
           id?: string
           job_title_ar?: string | null
           job_title_en?: string | null
@@ -422,6 +478,16 @@ export type Database = {
         | "phone"
         | "location"
         | "custom"
+      profile_section_kind:
+        | "metrics"
+        | "expertise"
+        | "experience"
+        | "credentials"
+        | "recognition"
+        | "languages"
+        | "documents"
+        | "services"
+        | "offices"
       profile_status: "draft" | "published" | "inactive"
       profile_type: "individual" | "company"
       wallet_pass_status: "pending" | "active" | "revoked" | "failed"
@@ -568,6 +634,17 @@ export const Constants = {
         "phone",
         "location",
         "custom",
+      ],
+      profile_section_kind: [
+        "metrics",
+        "expertise",
+        "experience",
+        "credentials",
+        "recognition",
+        "languages",
+        "documents",
+        "services",
+        "offices",
       ],
       profile_status: ["draft", "published", "inactive"],
       profile_type: ["individual", "company"],

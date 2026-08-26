@@ -3,7 +3,9 @@ import type { LocaleCode } from '#shared/constants/locales'
 import { STORAGE_BUCKETS } from '#shared/constants/storage'
 import type { Organization, OrganizationSummary } from '#shared/types/organization'
 import type { Profile, ProfileLink, ProfileListItem, PublicProfile, PublicProfileLink } from '#shared/types/profile'
+import { defaultSectionOrder } from '#shared/constants/profile-sections'
 import { profileAlternateUrls, profileUrl, publicStorageUrl } from '../utils/urls'
+import { toProfileSection, toPublicProfileSections } from './profile-section.mapper'
 
 /**
  * The single boundary between database rows and API responses.
@@ -18,6 +20,7 @@ import { profileAlternateUrls, profileUrl, publicStorageUrl } from '../utils/url
 
 type ProfileRow = Tables<'profiles'>
 type ProfileLinkRow = Tables<'profile_links'>
+type ProfileSectionRow = Tables<'profile_sections'>
 type OrganizationRow = Tables<'organizations'>
 
 /** Picks the value for a locale, falling back to the other one when empty. */
@@ -57,7 +60,11 @@ export function toProfileLink(row: ProfileLinkRow): ProfileLink {
 }
 
 /** Full dashboard-facing projection. */
-export function toProfile(row: ProfileRow, linkRows: ProfileLinkRow[] = []): Profile {
+export function toProfile(
+  row: ProfileRow,
+  linkRows: ProfileLinkRow[] = [],
+  sectionRows: ProfileSectionRow[] = [],
+): Profile {
   return {
     id: row.id,
     organizationId: row.organization_id,
@@ -71,6 +78,8 @@ export function toProfile(row: ProfileRow, linkRows: ProfileLinkRow[] = []): Pro
     jobTitleAr: row.job_title_ar,
     departmentEn: row.department_en,
     departmentAr: row.department_ar,
+    headlineEn: row.headline_en,
+    headlineAr: row.headline_ar,
     bioEn: row.bio_en,
     bioAr: row.bio_ar,
     locationEn: row.location_en,
@@ -81,6 +90,7 @@ export function toProfile(row: ProfileRow, linkRows: ProfileLinkRow[] = []): Pro
     whatsapp: row.whatsapp,
     linkedinUrl: row.linkedin_url,
     websiteUrl: row.website_url,
+    bookingUrl: row.booking_url,
 
     photoPath: row.photo_path,
     photoUrl: profilePhotoUrl(row),
@@ -94,6 +104,14 @@ export function toProfile(row: ProfileRow, linkRows: ProfileLinkRow[] = []): Pro
     links: [...linkRows]
       .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id))
       .map(toProfileLink),
+
+    sections: [...sectionRows]
+      .sort((a, b) =>
+        a.sort_order - b.sort_order
+        || defaultSectionOrder(a.kind) - defaultSectionOrder(b.kind)
+        || a.id.localeCompare(b.id),
+      )
+      .map(toProfileSection),
   }
 }
 
@@ -167,6 +185,7 @@ export function toPublicProfile(
   organizationRow: OrganizationRow,
   linkRows: ProfileLinkRow[],
   locale: LocaleCode,
+  sectionRows: ProfileSectionRow[] = [],
 ): PublicProfile {
   return {
     slug: row.slug,
@@ -176,6 +195,7 @@ export function toPublicProfile(
     name: localised(locale, row.name_en, row.name_ar) ?? row.name_en,
     jobTitle: localised(locale, row.job_title_en, row.job_title_ar),
     department: localised(locale, row.department_en, row.department_ar),
+    headline: localised(locale, row.headline_en, row.headline_ar),
     bio: localised(locale, row.bio_en, row.bio_ar),
     location: localised(locale, row.location_en, row.location_ar),
 
@@ -184,6 +204,7 @@ export function toPublicProfile(
     whatsapp: row.whatsapp,
     linkedinUrl: row.linkedin_url,
     websiteUrl: row.website_url,
+    bookingUrl: row.booking_url,
 
     photoUrl: profilePhotoUrl(row),
 
@@ -191,6 +212,8 @@ export function toPublicProfile(
       .filter(link => link.enabled)
       .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id))
       .map(link => toPublicProfileLink(link, locale)),
+
+    sections: toPublicProfileSections(sectionRows, locale),
 
     organization: toOrganizationSummary(organizationRow, locale),
 

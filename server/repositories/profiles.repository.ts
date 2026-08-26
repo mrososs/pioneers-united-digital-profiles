@@ -22,9 +22,11 @@ export type Client = SupabaseClient<Database>
 
 type ProfileRow = Tables<'profiles'>
 type ProfileLinkRow = Tables<'profile_links'>
+type ProfileSectionRow = Tables<'profile_sections'>
 
 const PROFILE_COLUMNS = '*'
 const LINK_COLUMNS = '*'
+const SECTION_COLUMNS = '*'
 
 export interface ProfileWithLinks {
   profile: ProfileRow
@@ -41,7 +43,9 @@ export interface ProfileWithLinks {
 export async function findPublishedProfileBySlug(client: Client, slug: string) {
   const { data, error } = await client
     .from('profiles')
-    .select(`${PROFILE_COLUMNS}, organizations!inner(*), profile_links(${LINK_COLUMNS})`)
+    .select(
+      `${PROFILE_COLUMNS}, organizations!inner(*), profile_links(${LINK_COLUMNS}), profile_sections(${SECTION_COLUMNS})`,
+    )
     .eq('slug', slug)
     .eq('status', 'published')
     .maybeSingle()
@@ -54,7 +58,7 @@ export async function findPublishedProfileBySlug(client: Client, slug: string) {
 export async function findProfileById(client: Client, id: string) {
   const { data, error } = await client
     .from('profiles')
-    .select(`${PROFILE_COLUMNS}, profile_links(${LINK_COLUMNS})`)
+    .select(`${PROFILE_COLUMNS}, profile_links(${LINK_COLUMNS}), profile_sections(${SECTION_COLUMNS})`)
     .eq('id', id)
     .maybeSingle()
 
@@ -240,6 +244,59 @@ export async function replaceProfileLinks(
     .from('profile_links')
     .insert(links.map(link => ({ ...link, profile_id: profileId })))
     .select(LINK_COLUMNS)
+
+  if (error) throw error
+
+  return data ?? []
+}
+
+// -----------------------------------------------------------------------------
+// Sections
+// -----------------------------------------------------------------------------
+
+export async function listProfileSections(client: Client, profileId: string): Promise<ProfileSectionRow[]> {
+  const { data, error } = await client
+    .from('profile_sections')
+    .select(SECTION_COLUMNS)
+    .eq('profile_id', profileId)
+    .order('sort_order', { ascending: true })
+
+  if (error) throw error
+
+  return data ?? []
+}
+
+/**
+ * Replaces a profile's sections wholesale.
+ *
+ * Same delete-then-insert shape as replaceProfileLinks, and for the same reason:
+ * the editor submits the complete set, so diffing would buy nothing. It matters
+ * more here, though — a unique index on (profile_id, kind) means an update that
+ * merely reordered kinds would collide mid-flight if applied row by row. Clearing
+ * first sidesteps that entirely.
+ *
+ * Not transactional (PostgREST cannot express one). A partial failure leaves the
+ * sections cleared, which is recoverable by re-saving; if that ever becomes
+ * unacceptable, move this into a plpgsql function called over RPC.
+ */
+export async function replaceProfileSections(
+  client: Client,
+  profileId: string,
+  sections: Omit<TablesInsert<'profile_sections'>, 'profile_id'>[],
+): Promise<ProfileSectionRow[]> {
+  const { error: deleteError } = await client
+    .from('profile_sections')
+    .delete()
+    .eq('profile_id', profileId)
+
+  if (deleteError) throw deleteError
+
+  if (sections.length === 0) return []
+
+  const { data, error } = await client
+    .from('profile_sections')
+    .insert(sections.map(section => ({ ...section, profile_id: profileId })))
+    .select(SECTION_COLUMNS)
 
   if (error) throw error
 
