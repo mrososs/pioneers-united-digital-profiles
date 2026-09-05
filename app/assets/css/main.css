@@ -610,6 +610,19 @@
     backdrop-filter: blur(8px);
     background-color: color-mix(in srgb, var(--color-surface) 82%, transparent);
   }
+
+  /* Print/PDF only: a hairline between content sections (About, each
+     structured block, Contact) once a profile carries more than one, so the
+     export doesn't rely on flex `gap` alone to separate them. Adjacent-sibling
+     rather than a class on the container's children: ProfilePrintSections
+     renders its own `<section>`s as DOM siblings of the bio/contact ones, so
+     this rule reaches across that component boundary without either side
+     needing to know which section ends up first. Matches the footer's
+     existing `border-t pt-8` divider for the same visual weight. */
+  .pu-print-section + .pu-print-section {
+    border-top: 1px solid var(--color-border);
+    padding-top: 2rem;
+  }
 }
 
 /* ---------------------------------------------------------------------------

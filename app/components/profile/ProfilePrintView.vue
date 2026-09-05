@@ -118,7 +118,7 @@ const contactRows = computed<ContactRow[]>(() => {
          A paragraph splits across a fold perfectly well. -->
     <section
       v-if="profile.bio"
-      class="flex flex-col gap-2.5"
+      class="pu-print-section flex flex-col gap-2.5"
     >
       <h2 class="pu-eyebrow break-after-avoid text-muted-fg">
         {{ t('profile.sections.about') }}
@@ -135,7 +135,7 @@ const contactRows = computed<ContactRow[]>(() => {
 
     <section
       v-if="contactRows.length > 0"
-      class="flex flex-col gap-2.5"
+      class="pu-print-section flex flex-col gap-2.5"
     >
       <h2 class="pu-eyebrow break-after-avoid text-muted-fg">
         {{ t('profile.sections.contact') }}

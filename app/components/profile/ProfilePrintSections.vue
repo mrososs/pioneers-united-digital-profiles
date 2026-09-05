@@ -54,7 +54,7 @@ const blocks = computed(() =>
   <section
     v-for="block in blocks"
     :key="block.section.id"
-    class="flex flex-col gap-2.5"
+    class="pu-print-section flex flex-col gap-2.5"
   >
     <h2 class="pu-eyebrow break-after-avoid text-muted-fg">
       {{ block.title }}
