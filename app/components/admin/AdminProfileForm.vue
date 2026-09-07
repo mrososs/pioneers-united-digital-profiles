@@ -3,14 +3,15 @@ import type { SelectOption } from '~/components/app/AppSelect.vue'
 import { PROFILE_STATUSES, PROFILE_TYPES } from '#shared/constants/profiles'
 import { STORAGE_BUCKETS, isAllowedMimeType, isWithinSizeLimit } from '#shared/constants/storage'
 import type { Profile } from '#shared/types/profile'
+import type { SectionFormEntry } from '~/utils/profile-section-form'
+import { toSectionFormEntry, toSectionSubmit } from '~/utils/profile-section-form'
 
 /**
  * Create / edit form for a profile.
  *
  * SCOPE
- *   The bilingual identity, role and contact fields — the write path that everything else
- *   depends on. The extra-links editor has a working server endpoint (`links` on the
- *   profile payload) but no UI yet.
+ *   The bilingual identity, role, contact and structured-content fields. The extra-links
+ *   editor (`links` on the profile payload) has a working server endpoint but no UI yet.
  *
  * PUBLIC LINK
  *   The slug is generated server-side from the English name plus a random suffix (see
@@ -69,6 +70,8 @@ const form = reactive({
   jobTitleAr: props.profile?.jobTitleAr ?? '',
   departmentEn: props.profile?.departmentEn ?? '',
   departmentAr: props.profile?.departmentAr ?? '',
+  headlineEn: props.profile?.headlineEn ?? '',
+  headlineAr: props.profile?.headlineAr ?? '',
   bioEn: props.profile?.bioEn ?? '',
   bioAr: props.profile?.bioAr ?? '',
   locationEn: props.profile?.locationEn ?? '',
@@ -78,6 +81,8 @@ const form = reactive({
   whatsapp: props.profile?.whatsapp ?? '',
   linkedinUrl: props.profile?.linkedinUrl ?? '',
   websiteUrl: props.profile?.websiteUrl ?? '',
+  bookingUrl: props.profile?.bookingUrl ?? '',
+  sections: (props.profile?.sections ?? []).map(toSectionFormEntry) as SectionFormEntry[],
 })
 
 const localPhotoUrl = shallowRef<string | null>(props.profile?.photoUrl ?? null)
@@ -197,6 +202,7 @@ function onSubmit() {
   const payload: Record<string, unknown> = {
     organizationId: props.organizationId,
     ...form,
+    sections: form.sections.map(toSectionSubmit),
   }
 
   // Only meaningful on create — see PHOTO above. The page strips this key before
@@ -563,6 +569,22 @@ function onSubmit() {
 
         <AppFormField
           v-slot="{ id, describedBy, invalid }"
+          :label="t('admin.profileForm.fields.bookingUrl')"
+          :error="errorFor('bookingUrl')"
+        >
+          <AppInput
+            :id="id"
+            v-model="form.bookingUrl"
+            type="url"
+            inputmode="url"
+            dir="ltr"
+            :invalid="invalid"
+            :described-by="describedBy"
+          />
+        </AppFormField>
+
+        <AppFormField
+          v-slot="{ id, describedBy, invalid }"
           :label="t('admin.profileForm.fields.locationEn')"
           :error="errorFor('locationEn')"
         >
@@ -598,6 +620,34 @@ function onSubmit() {
       <div class="grid gap-4 sm:grid-cols-2">
         <AppFormField
           v-slot="{ id, describedBy, invalid }"
+          :label="t('admin.profileForm.fields.headlineEn')"
+          :error="errorFor('headlineEn')"
+        >
+          <AppInput
+            :id="id"
+            v-model="form.headlineEn"
+            :maxlength="240"
+            :invalid="invalid"
+            :described-by="describedBy"
+          />
+        </AppFormField>
+
+        <AppFormField
+          v-slot="{ id, describedBy, invalid }"
+          :label="t('admin.profileForm.fields.headlineAr')"
+          :error="errorFor('headlineAr')"
+        >
+          <AppInput
+            :id="id"
+            v-model="form.headlineAr"
+            :maxlength="240"
+            :invalid="invalid"
+            :described-by="describedBy"
+          />
+        </AppFormField>
+
+        <AppFormField
+          v-slot="{ id, describedBy, invalid }"
           :label="t('admin.profileForm.fields.bioEn')"
           :error="errorFor('bioEn')"
         >
@@ -626,6 +676,23 @@ function onSubmit() {
           />
         </AppFormField>
       </div>
+    </fieldset>
+
+    <!-- Structured content ------------------------------------------------ -->
+    <fieldset class="flex flex-col gap-4">
+      <legend class="text-sm font-semibold text-foreground">
+        {{ t('admin.profileForm.sections.structuredContent') }}
+      </legend>
+
+      <p class="text-xs text-muted-fg">
+        {{ t('admin.profileForm.sections.structuredContentHint') }}
+      </p>
+
+      <AdminProfileSectionsEditor
+        v-model="form.sections"
+        :profile-type="form.profileType"
+        :field-errors="fieldErrors"
+      />
     </fieldset>
 
     <div class="flex flex-wrap gap-3">
