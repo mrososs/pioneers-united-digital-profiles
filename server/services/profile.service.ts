@@ -12,6 +12,7 @@ import type { AdminSession } from '#shared/types/session'
 import * as profilesRepository from '../repositories/profiles.repository'
 import type { Client } from '../repositories/profiles.repository'
 import { toProfile, toProfileListItem, toPublicProfile } from '../repositories/profile.mapper'
+import { getPublicPdfBrandingColors } from './organization.service'
 import { assertCanManageOrganization } from '../utils/auth'
 import { apiError, fromPostgrestError, isSlugCollisionError, notFound } from '../utils/errors'
 import { profileUrl } from '../utils/urls'
@@ -85,7 +86,9 @@ export async function getPublicProfile(
 ): Promise<PublicProfile> {
   const row = await fetchPublishedRow(event, slug)
 
-  return toPublicProfile(row, row.organization, row.links, locale, row.sections)
+  const pdfBranding = await getPublicPdfBrandingColors(event, row.organization_id, row.profile_type)
+
+  return toPublicProfile(row, row.organization, row.links, locale, row.sections, pdfBranding)
 }
 
 /** The data a vCard needs, resolved for one locale. */

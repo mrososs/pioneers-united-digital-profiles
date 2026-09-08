@@ -378,6 +378,16 @@
         "credentialsConfigured": "مُهيّأة على الخادم",
         "credentialsMissing": "غير مُهيّأة على الخادم",
         "saved": "تم حفظ إعدادات التكامل."
+      },
+      "pdfBranding": {
+        "title": "هوية ملف PDF",
+        "description": "ألوان الخلفية والنص والخطوط المستخدمة عند تصدير الملف الشخصي بصيغة PDF.",
+        "individualGroup": "الملفات الشخصية للأفراد",
+        "companyGroup": "الملف الشخصي للشركة",
+        "backgroundColor": "لون الخلفية",
+        "textColor": "لون النص",
+        "lineColor": "لون الخط",
+        "saved": "تم حفظ هوية ملف PDF."
       }
     }
   },

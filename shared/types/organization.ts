@@ -46,3 +46,22 @@ export interface Branding {
   footerNoteAr: string | null
   updatedAt: string
 }
+
+/** Background/text/line colours applied to the exported profile PDF, per profile type. */
+export interface PdfBranding {
+  organizationId: string
+  individualBackgroundColor: string | null
+  individualTextColor: string | null
+  individualLineColor: string | null
+  companyBackgroundColor: string | null
+  companyTextColor: string | null
+  companyLineColor: string | null
+  updatedAt: string
+}
+
+/** The trio resolved for one profile type — what the PDF print view actually consumes. */
+export interface PdfBrandingColors {
+  backgroundColor: string | null
+  textColor: string | null
+  lineColor: string | null
+}

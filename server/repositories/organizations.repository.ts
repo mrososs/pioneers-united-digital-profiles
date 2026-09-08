@@ -5,6 +5,7 @@ import type { Client } from './profiles.repository'
 
 type OrganizationRow = Tables<'organizations'>
 type BrandingRow = Tables<'organization_branding'>
+type PdfBrandingRow = Tables<'organization_pdf_branding'>
 type IntegrationRow = Tables<'integration_settings'>
 
 export async function findOrganizationById(client: Client, id: string): Promise<OrganizationRow | null> {
@@ -70,6 +71,37 @@ export async function upsertBranding(
 ): Promise<BrandingRow> {
   const { data, error } = await client
     .from('organization_branding')
+    .upsert(values, { onConflict: 'organization_id' })
+    .select('*')
+    .single()
+
+  if (error) throw error
+
+  return data
+}
+
+export async function findPdfBranding(client: Client, organizationId: string): Promise<PdfBrandingRow | null> {
+  const { data, error } = await client
+    .from('organization_pdf_branding')
+    .select('*')
+    .eq('organization_id', organizationId)
+    .maybeSingle()
+
+  if (error) throw error
+
+  return data
+}
+
+/**
+ * Upsert rather than update: PDF branding is 1:1 with an organization but the row is
+ * created lazily, so the first save must not 404.
+ */
+export async function upsertPdfBranding(
+  client: Client,
+  values: TablesInsert<'organization_pdf_branding'>,
+): Promise<PdfBrandingRow> {
+  const { data, error } = await client
+    .from('organization_pdf_branding')
     .upsert(values, { onConflict: 'organization_id' })
     .select('*')
     .single()

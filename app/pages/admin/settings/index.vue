@@ -29,6 +29,11 @@ const sections = computed(() => [
     title: t('admin.settings.integrations.title'),
     description: t('admin.settings.integrations.description'),
   },
+  {
+    to: '/admin/settings/pdf-branding',
+    title: t('admin.settings.pdfBranding.title'),
+    description: t('admin.settings.pdfBranding.description'),
+  },
 ])
 
 useSeoMeta({

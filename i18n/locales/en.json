@@ -378,6 +378,16 @@
         "credentialsConfigured": "Configured on the server",
         "credentialsMissing": "Not configured on the server",
         "saved": "Integration settings saved."
+      },
+      "pdfBranding": {
+        "title": "PDF Branding",
+        "description": "Background, text and line colours used when a profile is exported to PDF.",
+        "individualGroup": "Individual profiles",
+        "companyGroup": "Company profile",
+        "backgroundColor": "Background colour",
+        "textColor": "Text colour",
+        "lineColor": "Line colour",
+        "saved": "PDF branding saved."
       }
     }
   },

@@ -26,6 +26,24 @@ export const brandingUpdateSchema = brandingWriteSchema
   .refine(value => Object.keys(value).length > 0, { message: 'validation.emptyUpdate' })
 
 /**
+ * PDF branding. A background/text/line trio per profile type, applied to the
+ * exported profile PDF (server/services/pdf/pdf.service.ts) — see the migration
+ * header on organization_pdf_branding for why this is separate from `branding`.
+ */
+export const pdfBrandingWriteSchema = z.object({
+  individualBackgroundColor: optionalHexColorSchema,
+  individualTextColor: optionalHexColorSchema,
+  individualLineColor: optionalHexColorSchema,
+  companyBackgroundColor: optionalHexColorSchema,
+  companyTextColor: optionalHexColorSchema,
+  companyLineColor: optionalHexColorSchema,
+})
+
+export const pdfBrandingUpdateSchema = pdfBrandingWriteSchema
+  .partial()
+  .refine(value => Object.keys(value).length > 0, { message: 'validation.emptyUpdate' })
+
+/**
  * Integration settings hold NON-SECRET configuration only (whether a provider is
  * enabled, which class/template it writes to). Certificates, private keys and
  * service accounts live in environment variables — see docs/wallet.md.
@@ -48,4 +66,6 @@ export const integrationSettingsUpdateSchema = z.object({
 
 export type BrandingWriteInput = z.infer<typeof brandingWriteSchema>
 export type BrandingUpdateInput = z.infer<typeof brandingUpdateSchema>
+export type PdfBrandingWriteInput = z.infer<typeof pdfBrandingWriteSchema>
+export type PdfBrandingUpdateInput = z.infer<typeof pdfBrandingUpdateSchema>
 export type IntegrationSettingWriteInput = z.infer<typeof integrationSettingWriteSchema>

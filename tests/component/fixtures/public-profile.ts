@@ -54,6 +54,11 @@ export function publicProfileFixture(overrides: Partial<PublicProfile> = {}): Pu
       address: 'Riyadh, Saudi Arabia',
       logoUrl: null,
     },
+    pdfBranding: {
+      backgroundColor: null,
+      textColor: null,
+      lineColor: null,
+    },
 
     canonicalUrl: 'https://profile.pioneersunited.com/en/sample-executive',
     alternateUrls: {

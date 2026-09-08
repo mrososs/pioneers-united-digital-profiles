@@ -156,6 +156,7 @@ describe('toPublicProfile', () => {
       'location',
       'name',
       'organization',
+      'pdfBranding',
       'phone',
       'photoUrl',
       'profileType',

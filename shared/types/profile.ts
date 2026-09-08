@@ -1,6 +1,6 @@
 import type { LocaleCode } from '#shared/constants/locales'
 import type { ProfileLinkType, ProfileStatus, ProfileType } from '#shared/constants/profiles'
-import type { OrganizationSummary } from '#shared/types/organization'
+import type { OrganizationSummary, PdfBrandingColors } from '#shared/types/organization'
 import type { ProfileSection, PublicProfileSection } from '#shared/types/profile-section'
 
 /**
@@ -109,6 +109,8 @@ export interface PublicProfile {
   /** Structured content blocks, ordered, already resolved for `locale`. */
   sections: PublicProfileSection[]
   organization: OrganizationSummary
+  /** Background/text/line colours for this profile's PDF export, resolved for its type. */
+  pdfBranding: PdfBrandingColors
 
   /** Canonical absolute URL of this profile in this locale. */
   canonicalUrl: string

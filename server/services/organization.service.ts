@@ -3,10 +3,11 @@ import { serverSupabaseClient, serverSupabaseServiceRole } from '#supabase/serve
 import type { Tables, TablesInsert } from '#shared/types/database.types'
 import { STORAGE_BUCKETS } from '#shared/constants/storage'
 import { WALLET_PROVIDERS } from '#shared/constants/wallet'
-import type { Branding, Organization } from '#shared/types/organization'
+import type { Branding, Organization, PdfBranding, PdfBrandingColors } from '#shared/types/organization'
 import type { AdminSession } from '#shared/types/session'
-import type { BrandingUpdateInput, IntegrationSettingWriteInput } from '#shared/schemas/settings.schema'
+import type { BrandingUpdateInput, IntegrationSettingWriteInput, PdfBrandingUpdateInput } from '#shared/schemas/settings.schema'
 import type { OrganizationUpdateInput } from '#shared/schemas/organization.schema'
+import type { ProfileType } from '#shared/constants/profiles'
 import * as organizationsRepository from '../repositories/organizations.repository'
 import { toOrganization } from '../repositories/profile.mapper'
 import { assertCanManageOrganization } from '../utils/auth'
@@ -16,6 +17,7 @@ import { publicStorageUrl } from '../utils/urls'
 /** Organization, branding and integration business rules. */
 
 type BrandingRow = Tables<'organization_branding'>
+type PdfBrandingRow = Tables<'organization_pdf_branding'>
 type IntegrationRow = Tables<'integration_settings'>
 
 function toBranding(row: BrandingRow): Branding {
@@ -177,6 +179,116 @@ export async function updateBranding(
   try {
     const row = await organizationsRepository.upsertBranding(client, values)
     return toBranding(row)
+  }
+  catch (error) {
+    throw fromPostgrestError(error, event)
+  }
+}
+
+function toPdfBranding(row: PdfBrandingRow): PdfBranding {
+  return {
+    organizationId: row.organization_id,
+    individualBackgroundColor: row.individual_background_color,
+    individualTextColor: row.individual_text_color,
+    individualLineColor: row.individual_line_color,
+    companyBackgroundColor: row.company_background_color,
+    companyTextColor: row.company_text_color,
+    companyLineColor: row.company_line_color,
+    updatedAt: row.updated_at,
+  }
+}
+
+/**
+ * PDF branding for an organization. Returns defaults rather than 404 when no row
+ * exists yet, so the settings form always has something to render — same reasoning
+ * as getBranding above.
+ */
+export async function getPdfBranding(event: H3Event, organizationId: string): Promise<PdfBranding> {
+  const client = serverSupabaseServiceRole(event)
+
+  try {
+    const row = await organizationsRepository.findPdfBranding(client, organizationId)
+
+    if (row) return toPdfBranding(row)
+
+    return {
+      organizationId,
+      individualBackgroundColor: null,
+      individualTextColor: null,
+      individualLineColor: null,
+      companyBackgroundColor: null,
+      companyTextColor: null,
+      companyLineColor: null,
+      updatedAt: new Date(0).toISOString(),
+    }
+  }
+  catch (error) {
+    throw fromPostgrestError(error, event)
+  }
+}
+
+export async function updatePdfBranding(
+  event: H3Event,
+  session: AdminSession,
+  input: PdfBrandingUpdateInput,
+): Promise<PdfBranding> {
+  const client = serverSupabaseServiceRole(event)
+
+  const values: TablesInsert<'organization_pdf_branding'> = {
+    organization_id: session.organizationId,
+  }
+
+  const assign = <K extends keyof TablesInsert<'organization_pdf_branding'>>(
+    column: K,
+    value: TablesInsert<'organization_pdf_branding'>[K] | undefined,
+  ) => {
+    if (value !== undefined) values[column] = value
+  }
+
+  assign('individual_background_color', input.individualBackgroundColor)
+  assign('individual_text_color', input.individualTextColor)
+  assign('individual_line_color', input.individualLineColor)
+  assign('company_background_color', input.companyBackgroundColor)
+  assign('company_text_color', input.companyTextColor)
+  assign('company_line_color', input.companyLineColor)
+
+  try {
+    const row = await organizationsRepository.upsertPdfBranding(client, values)
+    return toPdfBranding(row)
+  }
+  catch (error) {
+    throw fromPostgrestError(error, event)
+  }
+}
+
+/**
+ * PDF branding resolved to the trio one profile actually renders with, through the
+ * REQUEST-SCOPED client so the same public RLS policy that governs `organization_branding`
+ * applies here too. Used by the print view that `renderProfilePdf` screenshots — see
+ * server/services/pdf/pdf.service.ts.
+ */
+export async function getPublicPdfBrandingColors(
+  event: H3Event,
+  organizationId: string,
+  profileType: ProfileType,
+): Promise<PdfBrandingColors> {
+  const client = await serverSupabaseClient(event)
+
+  try {
+    const row = await organizationsRepository.findPdfBranding(client, organizationId)
+    if (!row) return { backgroundColor: null, textColor: null, lineColor: null }
+
+    return profileType === 'company'
+      ? {
+          backgroundColor: row.company_background_color,
+          textColor: row.company_text_color,
+          lineColor: row.company_line_color,
+        }
+      : {
+          backgroundColor: row.individual_background_color,
+          textColor: row.individual_text_color,
+          lineColor: row.individual_line_color,
+        }
   }
   catch (error) {
     throw fromPostgrestError(error, event)

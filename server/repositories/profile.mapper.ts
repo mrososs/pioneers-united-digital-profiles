@@ -1,7 +1,7 @@
 import type { Tables } from '#shared/types/database.types'
 import type { LocaleCode } from '#shared/constants/locales'
 import { STORAGE_BUCKETS } from '#shared/constants/storage'
-import type { Organization, OrganizationSummary } from '#shared/types/organization'
+import type { Organization, OrganizationSummary, PdfBrandingColors } from '#shared/types/organization'
 import type { Profile, ProfileLink, ProfileListItem, PublicProfile, PublicProfileLink } from '#shared/types/profile'
 import { defaultSectionOrder } from '#shared/constants/profile-sections'
 import { profileAlternateUrls, profileUrl, publicStorageUrl } from '../utils/urls'
@@ -180,12 +180,15 @@ function toPublicProfileLink(row: ProfileLinkRow, locale: LocaleCode): PublicPro
  * `photoPath`, `createdAt`. Publication state is not something an anonymous caller
  * needs, and storage paths are an implementation detail.
  */
+const NO_PDF_BRANDING: PdfBrandingColors = { backgroundColor: null, textColor: null, lineColor: null }
+
 export function toPublicProfile(
   row: ProfileRow,
   organizationRow: OrganizationRow,
   linkRows: ProfileLinkRow[],
   locale: LocaleCode,
   sectionRows: ProfileSectionRow[] = [],
+  pdfBranding: PdfBrandingColors = NO_PDF_BRANDING,
 ): PublicProfile {
   return {
     slug: row.slug,
@@ -216,6 +219,7 @@ export function toPublicProfile(
     sections: toPublicProfileSections(sectionRows, locale),
 
     organization: toOrganizationSummary(organizationRow, locale),
+    pdfBranding,
 
     canonicalUrl: profileUrl(locale, row.slug),
     alternateUrls: profileAlternateUrls(row.slug),
